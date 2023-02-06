@@ -1,0 +1,41 @@
+#pragma once
+
+#include "ast.hpp"
+#include "lexer.hpp"
+
+class Parser
+{
+    public:
+        Parser() = default;
+        ~Parser() = default;
+
+        void feed(const std::string &expression);
+
+        [[nodiscard]] const ast::INode::ptr &getAstRoot() const noexcept;
+
+        void clear() noexcept;
+
+
+    private:
+        Lexer _lexer;
+        ast::INode::ptr _astRoot;
+
+        ast::ExpressionNode::ptr parseExpression();
+        ast::ExpressionNode::ptr parseLogicalOr();
+        ast::ExpressionNode::ptr parseLogicalAnd();
+        ast::ExpressionNode::ptr parseEquality();
+        ast::ExpressionNode::ptr parseComparison();
+        ast::ExpressionNode::ptr parseTerm();
+        ast::ExpressionNode::ptr parseFactor();
+        ast::ExpressionNode::ptr parseUnary();
+        ast::ExpressionNode::ptr parsePrimary();
+
+        using ParseFunction = std::function<ast::ExpressionNode::ptr ()>;
+
+        ast::ExpressionNode::ptr parseBinaryExpression(
+            const std::initializer_list<Token::Type> &matchTokens,
+            const ParseFunction &parseSubExpression
+        );
+
+        static SyntaxError syntaxError(const std::string &errorMessage, const Token::ptr &token);
+};

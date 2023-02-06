@@ -1,0 +1,25 @@
+set(SOURCES
+
+    ${PROJECT_ROOT}/src/interpreter/interpreter.cpp
+
+    ${PROJECT_ROOT}/src/lexer/lexer.cpp
+    ${PROJECT_ROOT}/src/lexer/lexLiterals.cpp
+    ${PROJECT_ROOT}/src/lexer/lexSingleCharToken.cpp
+    ${PROJECT_ROOT}/src/lexer/lexDoubleCharsToken.cpp
+
+    ${PROJECT_ROOT}/src/parser/Parser.cpp
+
+    ${PROJECT_ROOT}/src/token/token.cpp
+
+    ${PROJECT_ROOT}/src/evaluator/Evaluator.cpp
+
+    ${PROJECT_ROOT}/src/util/string.cpp
+
+    ${PROJECT_ROOT}/src/error/InterpreterError.cpp
+
+    ${PROJECT_ROOT}/src/ast/nodes/IntegerNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/BinaryNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/UnaryNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/ExpressionNode.cpp
+    ${PROJECT_ROOT}/src/ast/visitors/EvalVisitor.cpp
+)
