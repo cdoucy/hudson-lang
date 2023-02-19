@@ -121,6 +121,22 @@ TEST(ParserTest, InvalidSyntaxExpressions)
             .line = 0,
             .column = 4
         },
+        SyntaxErrorTest{
+            .description = "11. ! Without expression",
+            .expression = "!",
+            .errorMessage = "Syntax error: line 0, col 0: \"!\": expecting expression.",
+            .lexeme = "!",
+            .line = 0,
+            .column = 0
+        },
+        SyntaxErrorTest{
+            .description = "12. Unary + without expression",
+            .expression = "1 + 1 - +",
+            .errorMessage = "Syntax error: line 0, col 8: \"+\": expecting expression.",
+            .lexeme = "+",
+            .line = 0,
+            .column = 8
+        }
     };
 
     testParserError(expected);

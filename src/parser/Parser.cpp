@@ -117,7 +117,11 @@ ast::ExpressionNode::ptr Parser::parseUnary()
 
     this->_lexer.popToken();
 
-    return ast::UnaryNode::create(token->getType(), this->parseUnary());
+    auto expression = this->parseUnary();
+    if (!expression)
+        throw syntaxError("expecting expression", token);
+
+    return ast::UnaryNode::create(token->getType(), expression);
 }
 
 ast::ExpressionNode::ptr Parser::parsePrimary()
