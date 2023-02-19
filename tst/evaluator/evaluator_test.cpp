@@ -437,6 +437,16 @@ TEST(EvaluatorTest, BitwiseExpression)
             .description = "5. Left shift",
             .expression = "1 << 1",
             .expectedResult = 2,
+        },
+        EvaluatorTest{
+            .description = "6. NOT #1",
+            .expression = "~1",
+            .expectedResult = -2,
+        },
+        EvaluatorTest{
+            .description = "7. NOT #2",
+            .expression = "~~1",
+            .expectedResult = 1,
         }
     };
 

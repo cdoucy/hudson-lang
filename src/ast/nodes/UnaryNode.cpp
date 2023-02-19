@@ -3,7 +3,7 @@
 #include <utility>
 
 const std::initializer_list<Token::Type> unaryOperators{
-    Token::PLUS, Token::MINUS, Token::NOT
+    Token::PLUS, Token::MINUS, Token::NOT, Token::BITWISE_NOT
 };
 
 ast::UnaryNode::ptr ast::UnaryNode::create(Token::Type oprt, const ast::ExpressionNode::ptr &child)

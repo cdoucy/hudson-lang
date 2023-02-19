@@ -94,6 +94,10 @@ void ast::EvalVisitor::visit(ast::UnaryNode &node)
             this->_result = !child;
             break;
 
+        case Token::BITWISE_NOT:
+            this->_result = ~child;
+            break;
+
         default:
             throw InternalError("EvalVisitor: unknown operator");
     }

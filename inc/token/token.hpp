@@ -23,7 +23,7 @@ class Token
             EQUAL, NOT_EQUAL,
             ASSIGN, NOT,
             AND, OR,
-            BITWISE_AND, BITWISE_OR, BITWISE_XOR,
+            BITWISE_AND, BITWISE_OR, BITWISE_XOR, BITWISE_NOT,
             BITWISE_RSHIFT, BITWISE_LSHIFT,
             INTEGER,
         };

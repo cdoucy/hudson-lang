@@ -11,6 +11,7 @@ comparison  -> bitshift (( '<' | '<=' | '>' | '>=' ) bitshift ) *
 bitshift    -> term (( '>>' | '<<' ) term ) *
 term        -> factor ( ( '-' | '+' ) factor ) *
 factor      -> unary ( ( '/' | '*' | '%' ) unary ) *
-unary       -> ( '+' | '-' ) unary | primary
-primary     -> Number | '(' expression ')'
+unary       -> ( '+' | '-' | '!' | '~' ) unary | primary
+primary     -> Number | grouping
+grouping    -> '(' expression ')'
 ```

@@ -33,6 +33,7 @@ class Parser
         ast::ExpressionNode::ptr parseFactor();
         ast::ExpressionNode::ptr parseUnary();
         ast::ExpressionNode::ptr parsePrimary();
+        ast::ExpressionNode::ptr parseGrouping();
 
         using ParseFunction = std::function<ast::ExpressionNode::ptr ()>;
 

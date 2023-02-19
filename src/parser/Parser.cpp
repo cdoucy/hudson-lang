@@ -112,7 +112,7 @@ ast::ExpressionNode::ptr Parser::parseUnary()
     if (!token)
         return nullptr;
 
-    if (!token->isTypeAnyOf({Token::PLUS, Token::MINUS, Token::NOT}))
+    if (!token->isTypeAnyOf({Token::PLUS, Token::MINUS, Token::NOT, Token::BITWISE_NOT}))
         return this->parsePrimary();
 
     this->_lexer.popToken();
@@ -130,10 +130,18 @@ ast::ExpressionNode::ptr Parser::parsePrimary()
     if (!token)
         return nullptr;
 
-    if (token->isType(Token::INTEGER)) {
-        this->_lexer.popToken();
-        return ast::IntegerNode::create(token->getIntegerLiteral());
-    }
+    if (!token->isType(Token::INTEGER))
+        return this->parseGrouping();
+
+    this->_lexer.popToken();
+    return ast::IntegerNode::create(token->getIntegerLiteral());
+}
+
+ast::ExpressionNode::ptr Parser::parseGrouping()
+{
+    auto token = this->_lexer.getNextToken();
+    if (!token)
+        return nullptr;
 
     if (token->isType(Token::CLOSE_PARENTHESIS))
         throw syntaxError("expecting \"(\"", token);
@@ -146,7 +154,6 @@ ast::ExpressionNode::ptr Parser::parsePrimary()
     auto nextToken = this->_lexer.getNextToken();
     if (!nextToken || nextToken->isType(Token::CLOSE_PARENTHESIS))
         throw syntaxError("expecting expression", token);
-
 
     auto expression = this->parseExpression();
 
