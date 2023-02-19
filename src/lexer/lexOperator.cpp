@@ -33,6 +33,9 @@ static const std::unordered_map<char, Tok> tokenTable{
         '^', {Token::BITWISE_XOR, {}}
     },
     {
+        '~', {Token::BITWISE_NOT, {}}
+    },
+    {
         '=', {
             Token::ASSIGN, {
                 {'=', Token::EQUAL}
