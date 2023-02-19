@@ -23,7 +23,8 @@ class Token
             EQUAL, NOT_EQUAL,
             ASSIGN, NOT,
             AND, OR,
-            BITWISE_AND, BITWISE_OR,
+            BITWISE_AND, BITWISE_OR, BITWISE_XOR,
+            BITWISE_RSHIFT, BITWISE_LSHIFT,
             INTEGER,
         };
 
@@ -37,6 +38,8 @@ class Token
         {
             return std::make_shared<Token>(T, lexeme, line, column);
         }
+
+        static ptr create(Token::Type type, const std::string &lexeme, std::size_t line, std::size_t column);
 
         Token(Token::Type type, const std::string &lexeme, std::size_t line = 0, std::size_t column = 0);
 

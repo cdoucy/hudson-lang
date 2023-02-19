@@ -7,7 +7,9 @@ const std::initializer_list<Token::Type> binaryOperators{
     Token::PLUS, Token::MINUS,
     Token::EQUAL, Token::NOT_EQUAL,
     Token::GT, Token::GTE, Token::LT, Token::LTE,
-    Token::AND, Token::OR
+    Token::AND, Token::OR,
+    Token::BITWISE_OR, Token::BITWISE_XOR, Token::BITWISE_AND,
+    Token::BITWISE_LSHIFT, Token::BITWISE_RSHIFT
 };
 
 ast::BinaryNode::BinaryNode(

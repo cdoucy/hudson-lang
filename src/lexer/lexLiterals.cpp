@@ -9,10 +9,7 @@ bool Lexer::lexIntegerLiteral(std::string::const_iterator &begin)
 
     for (; std::isdigit(*it); ++it);
 
-    std::string lexeme(begin, it);
-    this->_queue.push(Token::create<Token::INTEGER>(lexeme, this->_line, this->_column));
-
-    this->_column += lexeme.size();
+    this->pushToken<Token::INTEGER>({begin, it});
 
     begin = it - 1;
 

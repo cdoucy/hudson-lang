@@ -5,8 +5,6 @@
 
 Lexer::Lexer()
 :   _lexerFunctions(this->createLexerFunctions()),
-    _singleCharTokenCreators(this->createSingleCharTokenCreators()),
-    _doubleCharTokenCreators(this->createDoubleCharTokenCreators()),
     _queue(),
     _line(0),
     _column(0)
@@ -17,8 +15,7 @@ std::vector<Lexer::LexerFunction> Lexer::createLexerFunctions()
 {
     return std::vector<Lexer::LexerFunction> {
         LEXER_FUNCTION(lexIntegerLiteral),
-        LEXER_FUNCTION(lexDoubleCharsToken),
-        LEXER_FUNCTION(lexSingleCharToken)
+        LEXER_FUNCTION(lexOperator)
     };
 }
 

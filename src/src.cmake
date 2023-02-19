@@ -4,8 +4,7 @@ set(SOURCES
 
     ${PROJECT_ROOT}/src/lexer/lexer.cpp
     ${PROJECT_ROOT}/src/lexer/lexLiterals.cpp
-    ${PROJECT_ROOT}/src/lexer/lexSingleCharToken.cpp
-    ${PROJECT_ROOT}/src/lexer/lexDoubleCharsToken.cpp
+    ${PROJECT_ROOT}/src/lexer/lexOperator.cpp
 
     ${PROJECT_ROOT}/src/parser/Parser.cpp
 
@@ -14,6 +13,7 @@ set(SOURCES
     ${PROJECT_ROOT}/src/evaluator/Evaluator.cpp
 
     ${PROJECT_ROOT}/src/util/string.cpp
+    ${PROJECT_ROOT}/src/util/map.cpp
 
     ${PROJECT_ROOT}/src/error/InterpreterError.cpp
 

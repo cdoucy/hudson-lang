@@ -410,6 +410,39 @@ TEST(EvaluatorTest, LogicalComparison)
     testEvaluator(testCases);
 }
 
+TEST(EvaluatorTest, BitwiseExpression)
+{
+    const std::vector<EvaluatorTest> testCases{
+        EvaluatorTest{
+            .description = "1. XOR",
+            .expression = "1 ^ 0",
+            .expectedResult = 1,
+        },
+        EvaluatorTest{
+            .description = "2. OR",
+            .expression = "1 ^ 0",
+            .expectedResult = 1,
+        },
+        EvaluatorTest{
+            .description = "3. AND",
+            .expression = "1 & 0",
+            .expectedResult = 0,
+        },
+        EvaluatorTest{
+            .description = "4. Right shift",
+            .expression = "1 >> 1",
+            .expectedResult = 0,
+        },
+        EvaluatorTest{
+            .description = "5. Left shift",
+            .expression = "1 << 1",
+            .expectedResult = 2,
+        }
+    };
+
+    testEvaluator(testCases);
+}
+
 TEST(EvaluatorTest, EvaluatorError)
 {
     struct EvaluatorErrorTest{

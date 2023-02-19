@@ -23,8 +23,12 @@ class Parser
         ast::ExpressionNode::ptr parseExpression();
         ast::ExpressionNode::ptr parseLogicalOr();
         ast::ExpressionNode::ptr parseLogicalAnd();
+        ast::ExpressionNode::ptr parseBitwiseOr();
+        ast::ExpressionNode::ptr parseBitwiseXor();
+        ast::ExpressionNode::ptr parseBitwiseAnd();
         ast::ExpressionNode::ptr parseEquality();
         ast::ExpressionNode::ptr parseComparison();
+        ast::ExpressionNode::ptr parseBitshift();
         ast::ExpressionNode::ptr parseTerm();
         ast::ExpressionNode::ptr parseFactor();
         ast::ExpressionNode::ptr parseUnary();

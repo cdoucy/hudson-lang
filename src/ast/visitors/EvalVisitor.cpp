@@ -32,7 +32,12 @@ static const std::unordered_map<Token::Type, OperatorFunction> operatorFunctions
     OPERATOR_FUNCTION(Token::GT, >),
     OPERATOR_FUNCTION(Token::GTE, >=),
     OPERATOR_FUNCTION(Token::LT, <),
-    OPERATOR_FUNCTION(Token::LTE, <=)
+    OPERATOR_FUNCTION(Token::LTE, <=),
+    OPERATOR_FUNCTION(Token::BITWISE_OR, |),
+    OPERATOR_FUNCTION(Token::BITWISE_XOR, ^),
+    OPERATOR_FUNCTION(Token::BITWISE_AND, &),
+    OPERATOR_FUNCTION(Token::BITWISE_LSHIFT, <<),
+    OPERATOR_FUNCTION(Token::BITWISE_RSHIFT, >>)
 };
 
 ast::EvalVisitor::EvalVisitor()
