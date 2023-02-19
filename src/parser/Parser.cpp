@@ -38,7 +38,31 @@ ast::ExpressionNode::ptr Parser::parseLogicalAnd()
 {
     return this->parseBinaryExpression(
         {Token::AND},
-        [this]() {return this->parseEquality();}
+        [this]() {return this->parseBitwiseOr();}
+    );
+}
+
+ast::ExpressionNode::ptr Parser::parseBitwiseOr()
+{
+    return this->parseBinaryExpression(
+        {Token::BITWISE_OR},
+        [this](){return this->parseBitwiseXor();}
+    );
+}
+
+ast::ExpressionNode::ptr Parser::parseBitwiseXor()
+{
+    return this->parseBinaryExpression(
+        {Token::BITWISE_XOR},
+        [this](){return this->parseBitwiseAnd();}
+    );
+}
+
+ast::ExpressionNode::ptr Parser::parseBitwiseAnd()
+{
+    return this->parseBinaryExpression(
+        {Token::BITWISE_AND},
+        [this](){return this->parseEquality();}
     );
 }
 
@@ -54,6 +78,14 @@ ast::ExpressionNode::ptr Parser::parseComparison()
 {
     return this->parseBinaryExpression(
         {Token::GT, Token::GTE, Token::LT, Token::LTE},
+        [this]() {return this->parseBitshift();}
+    );
+}
+
+ast::ExpressionNode::ptr Parser::parseBitshift()
+{
+    return this->parseBinaryExpression(
+        {Token::BITWISE_LSHIFT, Token::BITWISE_RSHIFT},
         [this]() {return this->parseTerm();}
     );
 }

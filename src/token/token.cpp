@@ -90,3 +90,8 @@ std::size_t Token::getColumn() const noexcept
 {
     return this->_column;
 }
+
+Token::ptr Token::create(Token::Type type, const std::string &lexeme, std::size_t line, std::size_t column)
+{
+    return std::make_shared<Token>(type, lexeme, line, column);
+}
