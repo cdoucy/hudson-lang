@@ -10,4 +10,5 @@ set(INCLUDES
     ${PROJECT_ROOT}/inc/ast
     ${PROJECT_ROOT}/inc/ast/nodes
     ${PROJECT_ROOT}/inc/ast/visitors
+    ${PROJECT_ROOT}/inc/runtime
 )

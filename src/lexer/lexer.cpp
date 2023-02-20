@@ -15,22 +15,27 @@ std::vector<Lexer::LexerFunction> Lexer::createLexerFunctions()
 {
     return std::vector<Lexer::LexerFunction> {
         LEXER_FUNCTION(lexIntegerLiteral),
-        LEXER_FUNCTION(lexOperator)
+        LEXER_FUNCTION(lexOperator),
+        LEXER_FUNCTION(lexProgrammingWord)
     };
 }
 
 void Lexer::feed(const std::string &expression)
 {
-    for (auto it = expression.begin(); it != expression.end(); ++it) {
+    auto it = expression.begin();
+
+    while (it != expression.end()) {
         if (*it == '\n') {
             this->_line++;
             this->_column = 0;
+            it++;
             continue;
         }
 
         // Ignore white spaces
         if (std::isspace(*it)) {
             this->_column++;
+            it++;
             continue;
         }
 
@@ -86,4 +91,21 @@ void Lexer::clear() noexcept
 
     this->_line = 0;
     this->_column = 0;
+}
+
+void Lexer::pushToken(Token::Type t, const std::string &lexeme)
+{
+    this->_queue.push(Token::create(t, lexeme, this->_line, this->_column));
+    this->_column += lexeme.size();
+}
+
+void Lexer::pushToken(
+    Token::Type t,
+    std::string::const_iterator &it,
+    long lexemeSize
+) {
+    const auto begin = it;
+    it += lexemeSize;
+    this->_queue.push(Token::create(t, {begin, it}, this->_line, this->_column));
+    this->_column += lexemeSize;
 }

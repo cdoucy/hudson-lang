@@ -36,6 +36,9 @@ static const std::unordered_map<char, Tok> tokenTable{
         '~', {Token::BITWISE_NOT, {}}
     },
     {
+        ';', {Token::SEMICOLON, {}}
+    },
+    {
         '=', {
             Token::ASSIGN, {
                 {'=', Token::EQUAL}
@@ -92,17 +95,8 @@ bool Lexer::lexOperator(std::string::const_iterator &begin)
 
     if (!transformType)
         this->pushToken(match->defaultType, begin, 1);
-    else {
+    else
         this->pushToken(*transformType, begin, 2);
-        begin++;
-    }
 
     return true;
-}
-
-void Lexer::pushToken(Token::Type t, const std::string::const_iterator &begin, long lexemeSize)
-{
-    const auto &end = begin + lexemeSize;
-    this->_queue.push(Token::create(t, {begin, end}, this->_line, this->_column));
-    this->_column += lexemeSize;
 }

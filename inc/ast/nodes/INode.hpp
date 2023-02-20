@@ -10,7 +10,7 @@ namespace ast
         public:
             using ptr = std::shared_ptr<INode>;
 
-            ~INode() = default;
+            virtual ~INode() = default;
 
             virtual void accept(IVisitor &visitor) = 0;
     };

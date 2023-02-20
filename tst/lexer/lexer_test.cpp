@@ -3,15 +3,41 @@
 
 #include "lexer.hpp"
 
+struct LexerTest
+{
+    std::string description;
+    std::string expression;
+    std::vector<Token> expected;
+};
+
+void testLexer(const std::vector<LexerTest> &testCases)
+{
+    for (const auto &testCase: testCases) {
+        std::cout << testCase.description << std::endl;
+        Lexer lexer;
+
+        lexer.feed(testCase.expression);
+
+        EXPECT_EQ(lexer.tokensCount(), testCase.expected.size());
+
+        if (testCase.expected.empty()) {
+            auto token = lexer.getNextToken();
+            EXPECT_FALSE(token);
+        }
+
+        for (const auto &expected: testCase.expected) {
+            auto token = lexer.getNextToken();
+
+            EXPECT_TRUE(token);
+            EXPECT_EQ(*token, expected);
+
+            lexer.popToken();
+        }
+    }
+}
+
 TEST(LexerTest, ValidExpressions)
 {
-    struct LexerTest
-    {
-        std::string description;
-        std::string expression;
-        std::vector<Token> expected;
-    };
-
     const std::vector<LexerTest> testCases{
         LexerTest{
             .description = "1. Empty expression",
@@ -107,28 +133,72 @@ TEST(LexerTest, ValidExpressions)
         }
     };
 
-    for (const auto &testCase: testCases) {
-        std::cout << testCase.description << std::endl;
-        Lexer lexer;
+    testLexer(testCases);
+}
 
-        lexer.feed(testCase.expression);
-
-        EXPECT_EQ(lexer.tokensCount(), testCase.expected.size());
-
-        if (testCase.expected.empty()) {
-            auto token = lexer.getNextToken();
-            EXPECT_FALSE(token);
+TEST(LexerTest, KeyWords)
+{
+    const std::vector<LexerTest> testCases{
+        LexerTest{
+            .description = "1. Simple let",
+            .expression = "let",
+            .expected = {
+                Token{Token::LET, "let"}
+            }
+        },
+        LexerTest{
+            .description = "2. Simple int",
+            .expression = "int",
+            .expected = {
+                Token{Token::INT_TYPE, "int"}
+            }
         }
+    };
 
-        for (const auto &expected: testCase.expected) {
-            auto token = lexer.getNextToken();
+    testLexer(testCases);
+}
 
-            EXPECT_TRUE(token);
-            EXPECT_EQ(*token, expected);
-
-            lexer.popToken();
+TEST(LexerTest, Identifiers)
+{
+    const std::vector<LexerTest> testCases{
+        LexerTest{
+            .description = "1. Simple identifier",
+            .expression = "n",
+            .expected = {
+                Token{Token::IDENTIFIER, "n"}
+            }
+        },
+        LexerTest{
+            .description = "2. Identifier with let",
+            .expression = "let var_NAME2 = 1",
+            .expected = {
+                Token{Token::LET, "let"},
+                Token{Token::IDENTIFIER, "var_NAME2"},
+                Token{Token::ASSIGN, "="},
+                Token{Token::INTEGER, "1"}
+            }
+        },
+        LexerTest{
+            .description = "3. Identifier prefixed by integer",
+            .expression = "123_varNAME",
+            .expected = {
+                Token{Token::INTEGER, "123"},
+                Token{Token::IDENTIFIER, "_varNAME"},
+            }
+        },
+        LexerTest{
+            .description = "4. Identifier that starts with a keyword",
+            .expression = "let letVAR123_NAMe = 1",
+            .expected = {
+                Token{Token::LET, "let"},
+                Token{Token::IDENTIFIER, "letVAR123_NAMe"},
+                Token{Token::ASSIGN, "="},
+                Token{Token::INTEGER, "1"}
+            }
         }
-    }
+    };
+
+    testLexer(testCases);
 }
 
 TEST(LexerTest, InvalidExpressions)
@@ -146,17 +216,17 @@ TEST(LexerTest, InvalidExpressions)
     const std::vector<LexerErrorTest> expected{
         LexerErrorTest{
             .description = "1. Simple invalid token",
-            .expression = "a",
-            .errorMessage = "Lexical error: line 0, col 0: \"a\": unknown token.",
-            .lexeme = "a",
+            .expression = "@",
+            .errorMessage = "Lexical error: line 0, col 0: \"@\": unknown token.",
+            .lexeme = "@",
             .line = 0,
             .column = 0
         },
         LexerErrorTest{
             .description = "2. Invalid token in expression",
-            .expression = "\n2 * (333/(44 %  5) + 666z66) - 777",
-            .errorMessage = "Lexical error: line 1, col 24: \"z\": unknown token.",
-            .lexeme = "z",
+            .expression = "\n2 * (333/(44 %  5) + 666@66) - 777",
+            .errorMessage = "Lexical error: line 1, col 24: \"@\": unknown token.",
+            .lexeme = "@",
             .line = 1,
             .column = 24
         }

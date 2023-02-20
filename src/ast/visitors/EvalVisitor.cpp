@@ -117,3 +117,35 @@ Token::Integer ast::EvalVisitor::evaluateChild(const ast::ExpressionNode::ptr &c
 
     return this->_result;
 }
+
+void ast::EvalVisitor::visit(ast::ExpressionStatementNode &node)
+{
+    node.getExpression()->accept(*this);
+}
+
+void ast::EvalVisitor::visit(ast::DeclarationNode &node)
+{
+    Token::Integer value = 0;
+    const auto &expression = node.getExpression();
+
+    if (expression)
+        value = this->evaluateChild(node.getExpression());
+
+    runtime::Object object(node.getIdentifier(), value);
+
+    this->_state.set(node.getIdentifier(), object);
+}
+
+void ast::EvalVisitor::visit(ast::AssignmentNode &node)
+{
+    auto &object = this->_state.get(node.getIdentifier());
+    auto value = this->evaluateChild(node.getExpression());
+
+    object.setInteger(value);
+}
+
+void ast::EvalVisitor::visit(ast::ProgramNode &program)
+{
+    for (const auto &stmt : program.getStatements())
+        stmt->accept(*this);
+}

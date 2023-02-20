@@ -16,6 +16,7 @@ class Token
     public:
         enum Type : uint8_t
         {
+            // Operators
             OPEN_PARENTHESIS, CLOSE_PARENTHESIS,
             MOD, DIV, MULT,
             PLUS, MINUS,
@@ -25,19 +26,22 @@ class Token
             AND, OR,
             BITWISE_AND, BITWISE_OR, BITWISE_XOR, BITWISE_NOT,
             BITWISE_RSHIFT, BITWISE_LSHIFT,
+            SEMICOLON,
+
+            // Literal types
             INTEGER,
+
+            // Keywords
+            LET, INT_TYPE,
+
+            // Identifier
+            IDENTIFIER
         };
 
-        using Integer = long;
+        using Integer = int;
 
         using ptr = std::shared_ptr<Token>;
         using queue = std::queue<ptr>;
-
-        template<Type T>
-        static ptr create(const std::string &lexeme, std::size_t line, std::size_t column)
-        {
-            return std::make_shared<Token>(T, lexeme, line, column);
-        }
 
         static ptr create(Token::Type type, const std::string &lexeme, std::size_t line, std::size_t column);
 

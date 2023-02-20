@@ -5,6 +5,7 @@ set(SOURCES
     ${PROJECT_ROOT}/src/lexer/lexer.cpp
     ${PROJECT_ROOT}/src/lexer/lexLiterals.cpp
     ${PROJECT_ROOT}/src/lexer/lexOperator.cpp
+    ${PROJECT_ROOT}/src/lexer/lexProgrammingWord.cpp
 
     ${PROJECT_ROOT}/src/parser/Parser.cpp
 
@@ -21,5 +22,12 @@ set(SOURCES
     ${PROJECT_ROOT}/src/ast/nodes/BinaryNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/UnaryNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/ExpressionNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/ProgramNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/ExpressionStatementNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/DeclarationNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/AssignmentNode.cpp
     ${PROJECT_ROOT}/src/ast/visitors/EvalVisitor.cpp
+
+    ${PROJECT_ROOT}/src/runtime/Object.cpp
+    ${PROJECT_ROOT}/src/runtime/State.cpp
 )
