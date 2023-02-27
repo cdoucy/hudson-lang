@@ -68,13 +68,21 @@ Token::ptr Lexer::getNextToken() const noexcept
     if (this->_queue.empty())
         return nullptr;
 
+
     return this->_queue.front();
+}
+
+Token::ptr Lexer::getPrevToken() const noexcept
+{
+    return this->_previousToken;
 }
 
 void Lexer::popToken() noexcept
 {
     if (this->_queue.empty())
         return;
+
+    this->_previousToken = this->_queue.front();
 
     this->_queue.pop();
 }

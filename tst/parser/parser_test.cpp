@@ -22,7 +22,7 @@ static void testParserError(const std::vector<SyntaxErrorTest> &expected)
         bool hasThrown = false;
 
         try {
-            parser.feed(expect.expression);
+            parser.feed(expect.expression + ";");
         } catch (const SyntaxError &err) {
             hasThrown = true;
 
@@ -76,7 +76,7 @@ TEST(ParserTest, InvalidSyntaxExpressions)
         SyntaxErrorTest{
             .description = "5. No opening parenthesis with expression",
             .expression = "1 + 1)",
-            .errorMessage = "Syntax error: line 0, col 5: \")\": unexpected token.",
+            .errorMessage = "Syntax error: line 0, col 5: \")\": unmatched parenthesis.",
             .lexeme = ")",
             .line = 0,
             .column = 5

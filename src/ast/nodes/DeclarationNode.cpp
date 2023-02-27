@@ -31,3 +31,12 @@ const ast::ExpressionNode::ptr &ast::DeclarationNode::getExpression() const
 {
     return this->_expression;
 }
+
+ast::DeclarationNode::ptr ast::DeclarationNode::create(
+    Token::Type type,
+    const std::string &identifier,
+    const ast::ExpressionNode::ptr &expression
+)
+{
+    return std::make_shared<ast::DeclarationNode>(type, identifier, expression);
+}

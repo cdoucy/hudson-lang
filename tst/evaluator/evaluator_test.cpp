@@ -15,7 +15,7 @@ static void testEvaluator(const std::vector<EvaluatorTest> &testCases)
     for (const auto &test : testCases) {
         std::cout << test.description << std::endl;
 
-        evaluator.feed(test.expression);
+        evaluator.feed(test.expression + ";");
 
         EXPECT_EQ(evaluator.getResult(), test.expectedResult);
 
@@ -453,6 +453,103 @@ TEST(EvaluatorTest, BitwiseExpression)
     testEvaluator(testCases);
 }
 
+TEST(EvaluatorTest, DeclarationAndAssignment)
+{
+    struct Test{
+        std::string description;
+        std::string expression;
+        std::unordered_map<std::string, runtime::Object> expected;
+        std::optional<Token::Integer> result;
+    };
+
+    std::vector<Test> testCases{
+        Test{
+            .description = "1. Declaration without assignment",
+            .expression = "int n;",
+            .expected = {
+                {"n", 0}
+            },
+            .result = std::nullopt
+        },
+        Test{
+            .description = "2. Declaration with assignment",
+            .expression = "int n = 42;",
+            .expected = {
+                {"n", 42}
+            },
+            .result = 42
+        },
+        Test{
+            .description = "3. Declaration without assignment and assignment",
+            .expression = "int n; n = 84;",
+            .expected = {
+                {"n", 84}
+            },
+            .result = 84
+        },
+        Test{
+            .description = "4. Declaration without assignment and assignment",
+            .expression = "int n = 42; n = 84;",
+            .expected = {
+                {"n", 84}
+            },
+            .result = 84
+        },
+        Test{
+            .description = "5. Declaration and expression #1",
+            .expression = "int n = 1; 1 + n;",
+            .expected = {
+                {"n", 1}
+            },
+            .result = 2
+        },
+        Test{
+            .description = "6. Declaration and expression #2",
+            .expression = "int n = 1; n + 1;",
+            .expected = {
+                {"n", 1}
+            },
+            .result = 2
+        },
+        Test{
+            .description = "7. Declaration without expression and expression #1",
+            .expression = "int n; 1 + n;",
+            .expected = {
+                {"n", 0}
+            },
+            .result = 1
+        },
+        Test{
+            .description = "8. Declaration without expression and expression #2",
+            .expression = "int n = 1; n + 1;",
+            .expected = {
+                {"n", 0}
+            },
+            .result = 1
+        }
+    };
+
+    for (const auto &test : testCases) {
+        std::cout << test.description << std::endl;
+        Evaluator evaluator;
+
+        evaluator.feed(test.expression);
+
+        const auto &state = evaluator.getState();
+
+        for (const auto &[identifier, expected] : test.expected) {
+            const auto &obj = state.get(identifier);
+
+            EXPECT_TRUE(obj);
+            EXPECT_EQ(obj->get(), expected);
+
+            if (test.result) {
+                EXPECT_EQ(evaluator.getResult(), *test.result);
+            }
+        }
+    }
+}
+
 TEST(EvaluatorTest, EvaluatorError)
 {
     struct EvaluatorErrorTest{
@@ -497,7 +594,7 @@ TEST(EvaluatorTest, EvaluatorError)
         bool hasThrown = false;
 
         try {
-            evaluator.feed(test.expression);
+            evaluator.feed(test.expression + ";");
         } catch (const LogicalError &err) {
             hasThrown = true;
 

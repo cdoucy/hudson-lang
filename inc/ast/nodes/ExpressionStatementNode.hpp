@@ -8,6 +8,9 @@ namespace ast
     class ExpressionStatementNode final : public StatementNode
     {
         public:
+            using ptr = std::shared_ptr<ExpressionStatementNode>;
+            static ptr create(const ExpressionNode::ptr &expression);
+
             explicit ExpressionStatementNode(ExpressionNode::ptr expression);
             ~ExpressionStatementNode() final = default;
 

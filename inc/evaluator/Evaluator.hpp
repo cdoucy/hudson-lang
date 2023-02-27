@@ -14,6 +14,8 @@ class Evaluator
 
         void clear() noexcept;
 
+        const runtime::State &getState() const noexcept;
+
     private:
         Parser _parser;
         ast::EvalVisitor _evalVisitor;

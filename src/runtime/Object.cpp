@@ -1,6 +1,8 @@
 #include "Object.hpp"
 
-runtime::Object::Object(std::string identifier, Token::Integer i)
+#include <utility>
+
+runtime::Object::Object(Token::Integer i, std::string identifier)
 :   _identifier(std::move(identifier)),
     _type(Token::INTEGER),
     _raw(i)
@@ -24,10 +26,19 @@ Token::Integer runtime::Object::getInteger() const
     return std::any_cast<Token::Integer>(this->_raw);
 }
 
-void runtime::Object::setInteger(Token::Integer i)
+void runtime::Object::set(Token::Integer i,  bool overwriteType)
 {
-    if (this->_type != Token::INTEGER)
+    if (overwriteType)
+        this->_type = Token::INTEGER;
+    else if (this->_type != Token::INTEGER)
         throw InternalError("token type is not integer");
 
     this->_raw = i;
+}
+
+runtime::Object::Object()
+:   _identifier(),
+    _type(Token::Type(-1)),
+    _raw()
+{
 }

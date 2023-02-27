@@ -8,7 +8,10 @@ namespace ast
     class ProgramNode final : public INode
     {
         public:
-            explicit ProgramNode(const std::list<StatementNode::ptr> &statements);
+            using ptr = std::shared_ptr<ProgramNode>;
+            static ptr create(const std::list<StatementNode::ptr> &statements);
+
+            ProgramNode(const std::list<StatementNode::ptr> &statements);
             ~ProgramNode() final = default;
 
             void accept(IVisitor &visitor) final;

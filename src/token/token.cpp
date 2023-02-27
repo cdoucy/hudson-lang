@@ -61,7 +61,7 @@ Token::Integer Token::integerFromLexeme(const std::string &lexeme)
     Token::Integer value;
 
     try {
-        value = std::stol(lexeme);
+        value = std::stoi(lexeme);
     } catch (...) {
         throw InternalError(fmt::format("\"{}\" : not an integer", lexeme));
     }

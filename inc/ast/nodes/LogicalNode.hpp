@@ -5,22 +5,23 @@
 
 namespace ast
 {
-    class BinaryNode final : public ExpressionNode
+    class LogicalNode final : public ExpressionNode
     {
         public:
-            using ptr = std::shared_ptr<BinaryNode>;
+            using ptr = std::shared_ptr<LogicalNode>;
+
             static ptr create(
                 Token::Type oprt,
                 const ast::ExpressionNode::ptr &left,
                 const ast::ExpressionNode::ptr &right
             );
 
-            BinaryNode(
+            LogicalNode(
                 Token::Type oprt,
                 ast::ExpressionNode::ptr left,
                 ast::ExpressionNode::ptr right
             );
-            ~BinaryNode() final = default;
+            ~LogicalNode() final = default;
 
             void accept(IVisitor &visitor) override;
             [[nodiscard]] Token::Type getOperator() const;

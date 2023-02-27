@@ -14,6 +14,7 @@ class Lexer
         void feed(const std::string &expression);
 
         [[nodiscard]] Token::ptr getNextToken() const noexcept;
+        [[nodiscard]] Token::ptr getPrevToken() const noexcept;
         void popToken() noexcept;
 
         [[nodiscard]] std::size_t tokensCount() const noexcept;
@@ -28,6 +29,7 @@ class Lexer
         Token::queue _queue;
         std::size_t _line;
         std::size_t _column;
+        Token::ptr _previousToken;
 
 
         bool lex(std::string::const_iterator &begin);

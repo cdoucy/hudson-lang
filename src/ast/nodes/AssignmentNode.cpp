@@ -25,3 +25,8 @@ const ast::ExpressionNode::ptr &ast::AssignmentNode::getExpression() const
 {
     return this->_expression;
 }
+
+ast::AssignmentNode::ptr ast::AssignmentNode::create(const std::string &identifier, const ast::ExpressionNode::ptr &expression)
+{
+    return std::make_shared<AssignmentNode>(identifier, expression);
+}

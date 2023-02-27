@@ -8,6 +8,9 @@ namespace ast
     class AssignmentNode final : public StatementNode
     {
         public:
+            using ptr = std::shared_ptr<AssignmentNode>;
+            static ptr create(const std::string &identifier, const ExpressionNode::ptr &expression = nullptr);
+
             explicit AssignmentNode(
                 std::string identifier,
                 ExpressionNode::ptr expression = nullptr

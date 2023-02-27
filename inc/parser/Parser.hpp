@@ -20,6 +20,11 @@ class Parser
         Lexer _lexer;
         ast::INode::ptr _astRoot;
 
+        ast::ProgramNode::ptr parseProgram();
+        ast::StatementNode::ptr parseStatement();
+        ast::StatementNode::ptr parseExpressionStatement();
+        ast::StatementNode::ptr parseDeclaration();
+        ast::StatementNode::ptr parseAssignment();
         ast::ExpressionNode::ptr parseExpression();
         ast::ExpressionNode::ptr parseLogicalOr();
         ast::ExpressionNode::ptr parseLogicalAnd();
@@ -33,13 +38,16 @@ class Parser
         ast::ExpressionNode::ptr parseFactor();
         ast::ExpressionNode::ptr parseUnary();
         ast::ExpressionNode::ptr parsePrimary();
+        ast::ExpressionNode::ptr parseInteger();
+        ast::ExpressionNode::ptr parseIdentifier();
         ast::ExpressionNode::ptr parseGrouping();
 
         using ParseFunction = std::function<ast::ExpressionNode::ptr ()>;
 
         ast::ExpressionNode::ptr parseBinaryExpression(
             const std::initializer_list<Token::Type> &matchTokens,
-            const ParseFunction &parseSubExpression
+            const ParseFunction &parseSubExpression,
+            bool logical = false
         );
 
         static SyntaxError syntaxError(const std::string &errorMessage, const Token::ptr &token);

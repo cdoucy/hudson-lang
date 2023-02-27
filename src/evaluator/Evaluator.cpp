@@ -21,3 +21,8 @@ void Evaluator::clear() noexcept
 {
     this->_parser.clear();
 }
+
+const runtime::State &Evaluator::getState() const noexcept
+{
+    return this->_evalVisitor.getState();
+}

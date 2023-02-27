@@ -15,3 +15,8 @@ const ast::ExpressionNode::ptr &ast::ExpressionStatementNode::getExpression() co
 {
     return this->_expression;
 }
+
+ast::ExpressionStatementNode::ptr ast::ExpressionStatementNode::create(const ast::ExpressionNode::ptr &expression)
+{
+    return std::make_shared<ExpressionStatementNode>(expression);
+}

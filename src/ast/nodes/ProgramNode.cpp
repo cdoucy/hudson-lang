@@ -14,3 +14,8 @@ const std::list<ast::StatementNode::ptr> &ast::ProgramNode::getStatements() cons
 {
     return this->_statements;
 }
+
+ast::ProgramNode::ptr ast::ProgramNode::create(const std::list<StatementNode::ptr> &statements)
+{
+    return std::make_shared<ProgramNode>(statements);
+}

@@ -9,6 +9,13 @@ namespace ast
     class DeclarationNode final : public StatementNode
     {
         public:
+            using ptr = std::shared_ptr<DeclarationNode>;
+            static ptr create(
+                Token::Type type,
+                const std::string &identifier,
+                const ExpressionNode::ptr &expression = nullptr
+            );
+
             DeclarationNode(
                 Token::Type type,
                 std::string identifier,
