@@ -7,7 +7,9 @@ class InterpreterError : public std::exception
 {
     public:
         InterpreterError(const std::string &errorType, const std::string &errorMessage) noexcept;
+        InterpreterError(const std::string &errorMessage) noexcept;
         InterpreterError(const InterpreterError &other) noexcept = default;
+        InterpreterError(std::string &errorMessage, const InterpreterError &other) noexcept;
 
         [[nodiscard]] const char *what() const noexcept override;
     protected:

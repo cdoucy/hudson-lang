@@ -55,6 +55,8 @@ class Token
 
         [[nodiscard]] static bool isTypeAnyOf(Token::Type type, const std::initializer_list<Token::Type> &types);
 
+        static std::string typeToString(Type type);
+
         [[nodiscard]] Integer getIntegerLiteral() const;
 
         [[nodiscard]] const std::string &getLexeme() const noexcept;
@@ -86,9 +88,9 @@ class Token
 
                 Iterator &reset(Token::queue &tokens);
 
-                std::optional<Token> get() const noexcept;
-                std::optional<Token> next() const noexcept;
-                std::optional<Token> prev() const noexcept;
+                [[nodiscard]] std::optional<Token> get() const noexcept;
+                [[nodiscard]] std::optional<Token> next() const noexcept;
+                [[nodiscard]] std::optional<Token> prev() const noexcept;
 
                 Iterator &advance();
 

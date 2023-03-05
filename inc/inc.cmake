@@ -11,4 +11,6 @@ set(INCLUDES
     ${PROJECT_ROOT}/inc/ast/nodes
     ${PROJECT_ROOT}/inc/ast/visitors
     ${PROJECT_ROOT}/inc/runtime
+    ${PROJECT_ROOT}/inc/repl
+    ${PROJECT_ROOT}/inc/source_file/
 )

@@ -1,6 +1,7 @@
-#include "Object.hpp"
-
 #include <utility>
+#include <fmt/format.h>
+
+#include "Object.hpp"
 
 runtime::Object::Object(Token::Integer i, std::string identifier)
 :   _identifier(std::move(identifier)),
@@ -41,4 +42,26 @@ runtime::Object::Object()
     _type(Token::Type(-1)),
     _raw()
 {
+}
+
+std::string runtime::Object::string() const noexcept
+{
+    const auto &identifier = this->_identifier;
+    const auto &type = Token::typeToString(this->_type);
+    const auto &value = this->getValueAsString();
+
+    return fmt::format("{{identifier={}, type={}, value={}}}", identifier, type, value);
+}
+
+std::string runtime::Object::getValueAsString() const noexcept
+{
+    switch (this->_type) {
+        case Token::INTEGER:
+            return fmt::format("{}", this->getInteger());
+
+        default:
+            break;
+    }
+
+    return "null";
 }

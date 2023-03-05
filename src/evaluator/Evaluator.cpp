@@ -26,3 +26,8 @@ const runtime::State &Evaluator::getState() const noexcept
 {
     return this->_evalVisitor.getState();
 }
+
+const ast::EvalVisitor &Evaluator::getVisitor() const noexcept
+{
+    return this->_evalVisitor;
+}

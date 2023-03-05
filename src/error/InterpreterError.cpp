@@ -16,6 +16,16 @@ const char *InterpreterError::what() const noexcept
     return this->_what.c_str();
 }
 
+InterpreterError::InterpreterError(const std::string &errorMessage) noexcept
+:   _what(errorMessage)
+{}
+
+InterpreterError::InterpreterError(std::string &errorMessage, const InterpreterError &other) noexcept
+:   _what(fmt::format("{}: {}", errorMessage, other._what))
+{
+
+}
+
 InternalError::InternalError(const std::string &errorMessage)
 : InterpreterError(INTERNAL_ERROR, errorMessage)
 {}
