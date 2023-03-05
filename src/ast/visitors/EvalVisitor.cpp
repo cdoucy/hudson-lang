@@ -156,3 +156,8 @@ const runtime::State &ast::EvalVisitor::getState() const noexcept
 {
     return this->_state;
 }
+
+const runtime::Object &ast::EvalVisitor::value() const noexcept
+{
+    return this->_expressionResult;
+}

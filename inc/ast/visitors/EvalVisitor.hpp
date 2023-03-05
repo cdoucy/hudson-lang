@@ -37,6 +37,7 @@ namespace ast
 
             void visit(ProgramNode &node) final;
 
+            const runtime::Object &value() const noexcept;
             [[nodiscard]] Token::Integer getResult() const;
 
             const runtime::State &getState() const noexcept;

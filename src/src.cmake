@@ -35,4 +35,8 @@ set(SOURCES
     ${PROJECT_ROOT}/src/runtime/Object.cpp
     ${PROJECT_ROOT}/src/runtime/object_operators.cpp
     ${PROJECT_ROOT}/src/runtime/State.cpp
+
+    ${PROJECT_ROOT}/src/repl/repl.cpp
+
+    ${PROJECT_ROOT}/src/source_file/SourceFile.cpp
 )

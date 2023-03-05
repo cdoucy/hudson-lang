@@ -1,23 +1,35 @@
-#include <iostream>
 #include <fmt/printf.h>
 
-#include "Evaluator.hpp"
+#include "SourceFile.hpp"
+#include "repl.hpp"
+
+void runInteractiveMode()
+{
+    Repl repl;
+
+    repl.run();
+}
+
+void runFileMode(const std::string &filePath)
+{
+    SourceFile source(filePath);
+    Evaluator evaluator;
+
+    source.interpret(evaluator);
+}
 
 int main(int ac, char **av)
 {
-    std::vector<std::string> args(av, av + ac);
+    try {
+        if (ac < 2)
+            runInteractiveMode();
+        else
+            runFileMode(std::string(av[1]));
 
-    if (args.size() < 2) {
-        fmt::print(stderr, "USAGE: {} EXPRESSION", args.front());
+    } catch (const std::exception &err) {
+        fmt::print(stderr, "Error : {}\n", err.what());
         return 1;
     }
-
-    Evaluator evaluator;
-    std::string expression = args[1];
-
-    evaluator.feed(expression);
-
-    std::cout << evaluator.getResult() << std::endl;
 
     return 0;
 }
