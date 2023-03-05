@@ -3,6 +3,7 @@
 void Parser::feed(const std::string &expression)
 {
     this->_lexer.feed(expression);
+    this->_tokenItr.reset(this->_lexer.getTokens());
     this->_astRoot = this->parseProgram();
 }
 
@@ -47,89 +48,90 @@ ast::StatementNode::ptr Parser::parseStatement()
 ast::StatementNode::ptr Parser::parseExpressionStatement()
 {
     const auto &expr = this->parseExpression();
-    const auto &token = this->_lexer.getNextToken();
-
+    const auto &token = this->_tokenItr.get();
     if (!expr)
         return nullptr;
 
     if (!token)
-        throw syntaxError("expecting \";\"", this->_lexer.getPrevToken());
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
 
     if (token->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("unmatched parenthesis", token);
+        throw syntaxError("unmatched parenthesis", *token);
+
+    if (token->isType(Token::IDENTIFIER))
+        throw syntaxError("unexpected identifier", *token);
 
     if (!token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting \";\"", token);
+        throw syntaxError("expecting \";\"", *token);
 
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
     return ast::ExpressionStatementNode::create(expr);
 }
 
 ast::StatementNode::ptr Parser::parseDeclaration()
 {
-    auto token = this->_lexer.getNextToken();
+    auto token = this->_tokenItr.get();
     if (!token || !token->isType(Token::INT_TYPE))
         return nullptr;
 
     Token::Type declarationType = token->getType();
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
-    token = this->_lexer.getNextToken();
+    token = this->_tokenItr.get();
     if (!token || !token->isType(Token::IDENTIFIER))
-        throw syntaxError("expecting identifier", this->_lexer.getPrevToken());
+        throw syntaxError("expecting identifier", *this->_tokenItr.prev());
 
     std::string identifier(token->getLexeme());
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
-    token = this->_lexer.getNextToken();
+    token = this->_tokenItr.get();
     if (!token)
-        throw syntaxError("expecting assignment or \";\"", this->_lexer.getPrevToken());
+        throw syntaxError("expecting assignment or \";\"", *this->_tokenItr.prev());
 
     ast::ExpressionNode::ptr expr;
 
     if (token->isType(Token::ASSIGN)) {
-        this->_lexer.popToken();
+        this->_tokenItr.advance();
 
         expr = this->parseExpression();
         if (!expr)
-            throw syntaxError("expecting expression", token);
+            throw syntaxError("expecting expression", *token);
 
-        token = this->_lexer.getNextToken();
+        token = this->_tokenItr.get();
     }
 
     if (!token || !token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting \";\"", this->_lexer.getPrevToken());
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
 
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
     return ast::DeclarationNode::create(declarationType, identifier, expr);
 }
 
 ast::StatementNode::ptr Parser::parseAssignment()
 {
-    auto token = this->_lexer.getNextToken();
+    auto token = this->_tokenItr.get();
      if (!token || !token->isType(Token::IDENTIFIER))
         return nullptr;
 
+     if (!this->_tokenItr.next()->isType(Token::ASSIGN))
+         return nullptr;
+
     std::string identifier(token->getLexeme());
-    this->_lexer.popToken();
+    token = this->_tokenItr.advance().get();
 
-    token = this->_lexer.getNextToken();
-    if (!token || !token->isType(Token::ASSIGN))
-        throw syntaxError("expecting assignment", this->_lexer.getPrevToken());
-
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
     const auto &expr = this->parseExpression();
     if (!expr)
-        throw syntaxError("expecting expression", token);
+        throw syntaxError("expecting expression", *token);
 
-    token = this->_lexer.getNextToken();
+    token = this->_tokenItr.get();
     if (!token || !token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting \";\"", this->_lexer.getPrevToken());
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
 
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
     return ast::AssignmentNode::create(identifier, expr);
 }
@@ -223,18 +225,18 @@ ast::ExpressionNode::ptr Parser::parseFactor()
 
 ast::ExpressionNode::ptr Parser::parseUnary()
 {
-    auto token = this->_lexer.getNextToken();
+    auto token = this->_tokenItr.get();
     if (!token)
         return nullptr;
 
     if (!token->isTypeAnyOf({Token::PLUS, Token::MINUS, Token::NOT, Token::BITWISE_NOT}))
         return this->parsePrimary();
 
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
     auto expression = this->parseUnary();
     if (!expression)
-        throw syntaxError("expecting expression", token);
+        throw syntaxError("expecting expression", *token);
 
     return ast::UnaryNode::create(token->getType(), expression);
 }
@@ -259,60 +261,60 @@ ast::ExpressionNode::ptr Parser::parsePrimary()
 
 ast::ExpressionNode::ptr Parser::parseInteger()
 {
-    auto token = this->_lexer.getNextToken();
+    auto token = this->_tokenItr.get();
     if (!token || !token->isType(Token::INTEGER))
         return nullptr;
 
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
     return ast::IntegerNode::create(token->getIntegerLiteral());
 }
 
 ast::ExpressionNode::ptr Parser::parseIdentifier()
 {
-    auto token = this->_lexer.getNextToken();
+    auto token = this->_tokenItr.get();
     if (!token || !token->isType(Token::IDENTIFIER))
         return nullptr;
 
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
     return ast::IdentifierNode::create(token->getLexeme());
 }
 
 ast::ExpressionNode::ptr Parser::parseGrouping()
 {
-    auto token = this->_lexer.getNextToken();
+    auto token = this->_tokenItr.get();
     if (!token)
         return nullptr;
 
     if (token->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("expecting \"(\"", token);
+        throw syntaxError("expecting \"(\"", *token);
 
     if (!token->isType(Token::OPEN_PARENTHESIS))
         return nullptr;
 
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
-    auto nextToken = this->_lexer.getNextToken();
+    auto nextToken = this->_tokenItr.get();
     if (!nextToken || nextToken->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("expecting expression", token);
+        throw syntaxError("expecting expression", *token);
 
     auto expression = this->parseExpression();
 
     if (!expression)
-        throw syntaxError("expecting expression", token);
+        throw syntaxError("expecting expression", *token);
 
-    nextToken = this->_lexer.getNextToken();
+    nextToken = this->_tokenItr.get();
 
     if (!nextToken || !nextToken->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("expecting \")\"", token);
+        throw syntaxError("expecting \")\"", *token);
 
-    this->_lexer.popToken();
+    this->_tokenItr.advance();
 
     return expression;
 }
 
-SyntaxError Parser::syntaxError(const std::string &errorMessage, const Token::ptr &token)
+SyntaxError Parser::syntaxError(const std::string &errorMessage, const Token &token)
 {
-    return {errorMessage, token->getLexeme(), token->getLine(), token->getColumn()};
+    return {errorMessage, token.getLexeme(), token.getLine(), token.getColumn()};
 }
 
 ast::ExpressionNode::ptr Parser::parseBinaryExpression(
@@ -323,24 +325,24 @@ ast::ExpressionNode::ptr Parser::parseBinaryExpression(
 {
     auto expression = parseSubExpression();
 
-    auto token = this->_lexer.getNextToken();
+    auto token = this->_tokenItr.get();
 
     while (token && token->isTypeAnyOf(matchTokens)) {
-        this->_lexer.popToken();
+        this->_tokenItr.advance();
 
         if (!expression)
-            throw syntaxError("expecting expression", token);
+            throw syntaxError("expecting expression", *token);
 
         auto subExpression = parseSubExpression();
         if (!subExpression)
-            throw syntaxError("expecting expression", token);
+            throw syntaxError("expecting expression", *token);
 
         if (!logical)
             expression = ast::BinaryNode::create(token->getType(), expression, subExpression);
         else
             expression = ast::LogicalNode::create(token->getType(), expression, subExpression);
 
-        token = this->_lexer.getNextToken();
+        token = this->_tokenItr.get();
     }
 
     return expression;

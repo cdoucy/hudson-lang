@@ -19,6 +19,7 @@ class Parser
     private:
         Lexer _lexer;
         ast::INode::ptr _astRoot;
+        Token::Iterator _tokenItr;
 
         ast::ProgramNode::ptr parseProgram();
         ast::StatementNode::ptr parseStatement();
@@ -50,5 +51,5 @@ class Parser
             bool logical = false
         );
 
-        static SyntaxError syntaxError(const std::string &errorMessage, const Token::ptr &token);
+        static SyntaxError syntaxError(const std::string &errorMessage, const Token &token);
 };

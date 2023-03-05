@@ -63,30 +63,6 @@ bool Lexer::lex(std::string::const_iterator &begin)
     return false;
 }
 
-Token::ptr Lexer::getNextToken() const noexcept
-{
-    if (this->_queue.empty())
-        return nullptr;
-
-
-    return this->_queue.front();
-}
-
-Token::ptr Lexer::getPrevToken() const noexcept
-{
-    return this->_previousToken;
-}
-
-void Lexer::popToken() noexcept
-{
-    if (this->_queue.empty())
-        return;
-
-    this->_previousToken = this->_queue.front();
-
-    this->_queue.pop();
-}
-
 std::size_t Lexer::tokensCount() const noexcept
 {
     return this->_queue.size();
@@ -114,6 +90,10 @@ void Lexer::pushToken(
 ) {
     const auto begin = it;
     it += lexemeSize;
-    this->_queue.push(Token::create(t, {begin, it}, this->_line, this->_column));
-    this->_column += lexemeSize;
+    this->pushToken(t, {begin, it});
+}
+
+Token::queue &Lexer::getTokens() noexcept
+{
+    return this->_queue;
 }

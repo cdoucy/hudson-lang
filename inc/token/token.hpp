@@ -6,6 +6,7 @@
 #include <string>
 #include <any>
 #include <initializer_list>
+#include <optional>
 
 #include <fmt/format.h>
 
@@ -40,8 +41,8 @@ class Token
 
         using Integer = int;
 
+    public:
         using ptr = std::shared_ptr<Token>;
-        using queue = std::queue<ptr>;
 
         static ptr create(Token::Type type, const std::string &lexeme, std::size_t line, std::size_t column);
 
@@ -72,4 +73,29 @@ class Token
 
         static std::any literalFromLexeme(Token::Type type, const std::string &lexeme);
         static Integer integerFromLexeme(const std::string &lexeme);
+
+    public:
+        using queue = std::queue<ptr>;
+
+        class Iterator
+        {
+            public:
+                Iterator() = default;
+                Iterator(Token::queue tokens);
+                ~Iterator() = default;
+
+                Iterator &reset(Token::queue &tokens);
+
+                std::optional<Token> get() const noexcept;
+                std::optional<Token> next() const noexcept;
+                std::optional<Token> prev() const noexcept;
+
+                Iterator &advance();
+
+
+            private:
+                Token::queue _tokens;
+                Token::ptr _current;
+                Token::ptr _prev;
+        };
 };

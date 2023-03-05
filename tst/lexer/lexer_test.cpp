@@ -20,18 +20,20 @@ void testLexer(const std::vector<LexerTest> &testCases)
 
         EXPECT_EQ(lexer.tokensCount(), testCase.expected.size());
 
+        Token::Iterator tokenItr(lexer.getTokens());
+
         if (testCase.expected.empty()) {
-            auto token = lexer.getNextToken();
-            EXPECT_FALSE(token);
+            auto token = tokenItr.get();
+            EXPECT_FALSE(token.has_value());
         }
 
         for (const auto &expected: testCase.expected) {
-            auto token = lexer.getNextToken();
+            auto token = tokenItr.get();
 
-            EXPECT_TRUE(token);
+            EXPECT_TRUE(token.has_value());
             EXPECT_EQ(*token, expected);
 
-            lexer.popToken();
+            tokenItr.advance();
         }
     }
 }

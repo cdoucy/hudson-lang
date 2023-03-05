@@ -521,11 +521,40 @@ TEST(EvaluatorTest, DeclarationAndAssignment)
         },
         Test{
             .description = "8. Declaration without expression and expression #2",
-            .expression = "int n = 1; n + 1;",
+            .expression = "int n; n + 1;",
             .expected = {
                 {"n", 0}
             },
             .result = 1
+        },
+        Test{
+            .description = "9. Multiple declarations",
+            .expression = "int x = 2; int y = x + 1; int z = x + y; z + x + y;",
+            .expected = {
+                {"x", 2},
+                {"y", 3},
+                {"z", 5}
+            },
+            .result = 10
+        },
+        Test{
+            .description = "10. Non alphabetic declarations",
+            .expression = "int n = 42; int _x1_ = n; int __1x1__ = _x1_; int abc1_123 = 84;",
+            .expected = {
+                {"n", 42},
+                {"_x1_", 42},
+                {"abc1_123", 84}
+            },
+            .result = 84
+        },
+        Test{
+            .description = "11. Declaration with complex expression",
+            .expression = "int a = 42; int b = (a * 41 * ((2 + 28) * a)); b;",
+            .expected = {
+                {"a", 42},
+                {"b", 2169720},
+            },
+            .result = 2169720
         }
     };
 
@@ -583,6 +612,51 @@ TEST(EvaluatorTest, EvaluatorError)
             .description = "5. Div by zero with AND",
             .expression = "1 && 1 / 0",
             .errorMessage = "Logical error: division by zero."
+        },
+        EvaluatorErrorTest{
+            .description = "6. Unknown identifier #1",
+            .expression = "n",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "7. Unknown identifier #2",
+            .expression = "1 + n",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "8. Unknown identifier #3",
+            .expression = "n + 1",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "9. Unknown identifier #4",
+            .expression = "int n = n",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "10. Unknown identifier #5",
+            .expression = "n = 1",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "11. Identifier already defined #1",
+            .expression = "int n; int n;",
+            .errorMessage = "Logical error: n: identifier already defined."
+        },
+        EvaluatorErrorTest{
+            .description = "12. Identifier already defined #2",
+            .expression = "int n = 1; int n;",
+            .errorMessage = "Logical error: n: identifier already defined."
+        },
+        EvaluatorErrorTest{
+            .description = "13. Identifier already defined #3",
+            .expression = "int n; int n = 1;",
+            .errorMessage = "Logical error: n: identifier already defined."
+        },
+        EvaluatorErrorTest{
+            .description = "14. Identifier already defined #4",
+            .expression = "int n = 1; int x = n; int n = x; x = n",
+            .errorMessage = "Logical error: n: identifier already defined."
         }
     };
 
@@ -596,6 +670,10 @@ TEST(EvaluatorTest, EvaluatorError)
         try {
             evaluator.feed(test.expression + ";");
         } catch (const LogicalError &err) {
+            hasThrown = true;
+
+            EXPECT_STREQ(err.what(), test.errorMessage.c_str());
+        } catch (const SyntaxError &err) {
             hasThrown = true;
 
             EXPECT_STREQ(err.what(), test.errorMessage.c_str());

@@ -10,6 +10,7 @@ set(SOURCES
     ${PROJECT_ROOT}/src/parser/Parser.cpp
 
     ${PROJECT_ROOT}/src/token/token.cpp
+    ${PROJECT_ROOT}/src/token/iterator.cpp
 
     ${PROJECT_ROOT}/src/evaluator/Evaluator.cpp
 
