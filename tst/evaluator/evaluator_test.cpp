@@ -570,7 +570,7 @@ TEST(EvaluatorTest, DeclarationAndAssignment)
             const auto &obj = state.get(identifier);
 
             EXPECT_TRUE(obj);
-            EXPECT_EQ(obj->get(), expected);
+            EXPECT_EQ(*obj, expected);
 
             if (test.result) {
                 EXPECT_EQ(evaluator.getResult(), *test.result);

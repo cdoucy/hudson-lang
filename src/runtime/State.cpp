@@ -22,12 +22,12 @@ void runtime::State::set(const std::string &identifier, const runtime::Object &o
     this->_state.insert({identifier, std::make_unique<Object>(object)});
 }
 
-std::optional<const std::reference_wrapper<runtime::Object>> runtime::State::get(const std::string &identifier) const noexcept
+std::optional<runtime::Object> runtime::State::get(const std::string &identifier) const noexcept
 {
     const auto &found = this->_state.find(identifier);
 
     if (found == this->_state.end())
         return {};
 
-    return {{*found->second}};
+    return {*found->second};
 }

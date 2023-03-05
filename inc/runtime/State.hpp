@@ -14,7 +14,7 @@ namespace runtime
             ~State() = default;
 
             [[nodiscard]] Object &get(const std::string &identifier);
-            [[nodiscard]] std::optional<const std::reference_wrapper<Object>> get(const std::string &identifier) const noexcept;
+            [[nodiscard]] std::optional<Object> get(const std::string &identifier) const noexcept;
             void set(const std::string &identifier, const Object &object);
 
         private:
