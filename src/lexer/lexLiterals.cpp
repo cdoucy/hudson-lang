@@ -9,9 +9,9 @@ bool Lexer::lexIntegerLiteral(std::string::const_iterator &begin)
 
     for (; std::isdigit(*it); ++it);
 
-    this->pushToken<Token::INTEGER>({begin, it});
+    this->pushToken(Token::INTEGER, {begin, it});
 
-    begin = it - 1;
+    begin = it;
 
     return true;
 }

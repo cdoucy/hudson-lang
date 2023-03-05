@@ -3,27 +3,15 @@
 
 #include "EvalVisitor.hpp"
 
-#define OPERATOR_FUNCTION(type, op) {type, [](auto l, auto r){return l op r;}}
+#define OPERATOR_FUNCTION(type, op) {type, [](const auto &l, const auto &r){return l op r;}}
 
-using OperatorFunction = std::function<Token::Integer (Token::Integer leftHand, Token::Integer rightHand)>;
+using OperatorFunction = std::function<
+    runtime::Object(const runtime::Object &left, const runtime::Object &right)
+>;
 
 static const std::unordered_map<Token::Type, OperatorFunction> operatorFunctionsMap{
-    {
-        Token::MOD, [](auto l, auto r) {
-            if (r == 0)
-                throw LogicalError("modulo by zero");
-
-            return l % r;
-        }
-    },
-    {
-        Token::DIV, [](auto l, auto r) {
-            if (r == 0)
-                throw LogicalError("division by zero");
-
-            return l / r;
-        }
-    },
+    OPERATOR_FUNCTION(Token::MOD, %),
+    OPERATOR_FUNCTION(Token::DIV, /),
     OPERATOR_FUNCTION(Token::MULT, *),
     OPERATOR_FUNCTION(Token::PLUS, +),
     OPERATOR_FUNCTION(Token::MINUS, -),
@@ -40,62 +28,43 @@ static const std::unordered_map<Token::Type, OperatorFunction> operatorFunctions
     OPERATOR_FUNCTION(Token::BITWISE_RSHIFT, >>)
 };
 
-ast::EvalVisitor::EvalVisitor()
-:   _result(0)
-{}
-
 void ast::EvalVisitor::visit(ast::IntegerNode &node)
 {
-    this->_result = node.getValue();
+    this->_expressionResult = node.getValue();
 }
 
 void ast::EvalVisitor::visit(ast::BinaryNode &node)
 {
-    Token::Integer leftHand = this->evaluateChild(node.getLeftChild());
+    const runtime::Object left = this->evaluate(node.getLeftChild());
+    const runtime::Object &right = this->evaluate(node.getRightChild());
 
-    switch (node.getOperator()) {
-        // AND and OR are special case since they control evaluation flow
-        case Token::AND:
-            this->_result = leftHand && this->evaluateChild(node.getRightChild());
-            return;
-
-        case Token::OR:
-            this->_result = leftHand || this->evaluateChild(node.getRightChild());
-            return;
-
-        default:
-            break;
-    }
-
-    Token::Integer rightHand = this->evaluateChild(node.getRightChild());
-
-    auto operatorFunc = operatorFunctionsMap.find(node.getOperator());
+    const auto &operatorFunc = operatorFunctionsMap.find(node.getOperator());
 
     if (operatorFunc == operatorFunctionsMap.end())
         throw InternalError("EvalVisitor: unknown operator");
 
-    this->_result = operatorFunc->second(leftHand, rightHand);
+    this->_expressionResult = operatorFunc->second(left, right);
 }
 
 void ast::EvalVisitor::visit(ast::UnaryNode &node)
 {
-    Token::Integer child = this->evaluateChild(node.getChild());
+    const runtime::Object &obj = this->evaluate(node.getChild());
 
     switch (node.getOperator()) {
         case Token::PLUS:
-            this->_result = +child;
+            this->_expressionResult = +obj;
             break;
 
         case Token::MINUS:
-            this->_result = -child;
+            this->_expressionResult = -obj;
             break;
 
         case Token::NOT:
-            this->_result = !child;
+            this->_expressionResult = !obj;
             break;
 
         case Token::BITWISE_NOT:
-            this->_result = ~child;
+            this->_expressionResult = ~obj;
             break;
 
         default:
@@ -103,9 +72,32 @@ void ast::EvalVisitor::visit(ast::UnaryNode &node)
     }
 }
 
+void ast::EvalVisitor::visit(ast::LogicalNode &node)
+{
+    const runtime::Object &left = this->evaluate(node.getLeftChild());
+
+    switch (node.getOperator()) {
+        case Token::AND:
+            this->_expressionResult = left && this->evaluate(node.getRightChild());
+            break;
+
+        case Token::OR:
+            this->_expressionResult = left || this->evaluate(node.getRightChild());
+            break;
+
+        default:
+            throw InternalError("EvalVisitor: operator is not logical");
+    }
+}
+
+void ast::EvalVisitor::visit(ast::IdentifierNode &node)
+{
+    this->_expressionResult = this->_state.get(node.getIdentifier());
+}
+
 Token::Integer ast::EvalVisitor::getResult() const
 {
-    return this->_result;
+    return this->_expressionResult.getInteger();
 }
 
 Token::Integer ast::EvalVisitor::evaluateChild(const ast::ExpressionNode::ptr &child)
@@ -115,5 +107,52 @@ Token::Integer ast::EvalVisitor::evaluateChild(const ast::ExpressionNode::ptr &c
 
     child->accept(*this);
 
-    return this->_result;
+    return this->_expressionResult.getInteger();
+}
+
+void ast::EvalVisitor::visit(ast::ExpressionStatementNode &node)
+{
+    node.getExpression()->accept(*this);
+}
+
+void ast::EvalVisitor::visit(ast::DeclarationNode &node)
+{
+    Token::Integer value = 0;
+    const auto &expression = node.getExpression();
+
+    if (expression)
+        value = this->evaluateChild(node.getExpression());
+
+    runtime::Object object(value, node.getIdentifier());
+
+    this->_state.set(node.getIdentifier(), object);
+}
+
+void ast::EvalVisitor::visit(ast::AssignmentNode &node)
+{
+    auto &object = this->_state.get(node.getIdentifier());
+    auto value = this->evaluateChild(node.getExpression());
+
+    object.set(value);
+}
+
+void ast::EvalVisitor::visit(ast::ProgramNode &program)
+{
+    for (const auto &stmt : program.getStatements())
+        stmt->accept(*this);
+}
+
+const runtime::Object &ast::EvalVisitor::evaluate(const ast::ExpressionNode::ptr &expr)
+{
+    if (!expr)
+        throw InternalError("EvalVisitor: expr is null");
+
+    expr->accept(*this);
+
+    return this->_expressionResult;
+}
+
+const runtime::State &ast::EvalVisitor::getState() const noexcept
+{
+    return this->_state;
 }

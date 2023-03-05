@@ -16,7 +16,8 @@ int main(int ac, char **av)
     std::string expression = args[1];
 
     evaluator.feed(expression);
-    fmt::print("{}\n", evaluator.getResult());
+
+    std::cout << evaluator.getResult() << std::endl;
 
     return 0;
 }

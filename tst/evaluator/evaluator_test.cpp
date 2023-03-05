@@ -15,7 +15,7 @@ static void testEvaluator(const std::vector<EvaluatorTest> &testCases)
     for (const auto &test : testCases) {
         std::cout << test.description << std::endl;
 
-        evaluator.feed(test.expression);
+        evaluator.feed(test.expression + ";");
 
         EXPECT_EQ(evaluator.getResult(), test.expectedResult);
 
@@ -453,6 +453,132 @@ TEST(EvaluatorTest, BitwiseExpression)
     testEvaluator(testCases);
 }
 
+TEST(EvaluatorTest, DeclarationAndAssignment)
+{
+    struct Test{
+        std::string description;
+        std::string expression;
+        std::unordered_map<std::string, runtime::Object> expected;
+        std::optional<Token::Integer> result;
+    };
+
+    std::vector<Test> testCases{
+        Test{
+            .description = "1. Declaration without assignment",
+            .expression = "int n;",
+            .expected = {
+                {"n", 0}
+            },
+            .result = std::nullopt
+        },
+        Test{
+            .description = "2. Declaration with assignment",
+            .expression = "int n = 42;",
+            .expected = {
+                {"n", 42}
+            },
+            .result = 42
+        },
+        Test{
+            .description = "3. Declaration without assignment and assignment",
+            .expression = "int n; n = 84;",
+            .expected = {
+                {"n", 84}
+            },
+            .result = 84
+        },
+        Test{
+            .description = "4. Declaration without assignment and assignment",
+            .expression = "int n = 42; n = 84;",
+            .expected = {
+                {"n", 84}
+            },
+            .result = 84
+        },
+        Test{
+            .description = "5. Declaration and expression #1",
+            .expression = "int n = 1; 1 + n;",
+            .expected = {
+                {"n", 1}
+            },
+            .result = 2
+        },
+        Test{
+            .description = "6. Declaration and expression #2",
+            .expression = "int n = 1; n + 1;",
+            .expected = {
+                {"n", 1}
+            },
+            .result = 2
+        },
+        Test{
+            .description = "7. Declaration without expression and expression #1",
+            .expression = "int n; 1 + n;",
+            .expected = {
+                {"n", 0}
+            },
+            .result = 1
+        },
+        Test{
+            .description = "8. Declaration without expression and expression #2",
+            .expression = "int n; n + 1;",
+            .expected = {
+                {"n", 0}
+            },
+            .result = 1
+        },
+        Test{
+            .description = "9. Multiple declarations",
+            .expression = "int x = 2; int y = x + 1; int z = x + y; z + x + y;",
+            .expected = {
+                {"x", 2},
+                {"y", 3},
+                {"z", 5}
+            },
+            .result = 10
+        },
+        Test{
+            .description = "10. Non alphabetic declarations",
+            .expression = "int n = 42; int _x1_ = n; int __1x1__ = _x1_; int abc1_123 = 84;",
+            .expected = {
+                {"n", 42},
+                {"_x1_", 42},
+                {"abc1_123", 84}
+            },
+            .result = 84
+        },
+        Test{
+            .description = "11. Declaration with complex expression",
+            .expression = "int a = 42; int b = (a * 41 * ((2 + 28) * a)); b;",
+            .expected = {
+                {"a", 42},
+                {"b", 2169720},
+            },
+            .result = 2169720
+        }
+    };
+
+    for (const auto &test : testCases) {
+        std::cout << test.description << std::endl;
+        Evaluator evaluator;
+
+        evaluator.feed(test.expression);
+
+        const auto &state = evaluator.getState();
+
+        for (const auto &[identifier, expected] : test.expected) {
+            const auto &obj = state.get(identifier);
+
+            EXPECT_TRUE(obj);
+            EXPECT_EQ(*obj, expected);
+
+            if (test.result) {
+                EXPECT_EQ(evaluator.getResult(), *test.result);
+            }
+        }
+    }
+}
+
 TEST(EvaluatorTest, EvaluatorError)
 {
     struct EvaluatorErrorTest{
@@ -486,6 +612,51 @@ TEST(EvaluatorTest, EvaluatorError)
             .description = "5. Div by zero with AND",
             .expression = "1 && 1 / 0",
             .errorMessage = "Logical error: division by zero."
+        },
+        EvaluatorErrorTest{
+            .description = "6. Unknown identifier #1",
+            .expression = "n",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "7. Unknown identifier #2",
+            .expression = "1 + n",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "8. Unknown identifier #3",
+            .expression = "n + 1",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "9. Unknown identifier #4",
+            .expression = "int n = n",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "10. Unknown identifier #5",
+            .expression = "n = 1",
+            .errorMessage = "Logical error: n: undefined identifier."
+        },
+        EvaluatorErrorTest{
+            .description = "11. Identifier already defined #1",
+            .expression = "int n; int n;",
+            .errorMessage = "Logical error: n: identifier already defined."
+        },
+        EvaluatorErrorTest{
+            .description = "12. Identifier already defined #2",
+            .expression = "int n = 1; int n;",
+            .errorMessage = "Logical error: n: identifier already defined."
+        },
+        EvaluatorErrorTest{
+            .description = "13. Identifier already defined #3",
+            .expression = "int n; int n = 1;",
+            .errorMessage = "Logical error: n: identifier already defined."
+        },
+        EvaluatorErrorTest{
+            .description = "14. Identifier already defined #4",
+            .expression = "int n = 1; int x = n; int n = x; x = n",
+            .errorMessage = "Logical error: n: identifier already defined."
         }
     };
 
@@ -497,8 +668,12 @@ TEST(EvaluatorTest, EvaluatorError)
         bool hasThrown = false;
 
         try {
-            evaluator.feed(test.expression);
+            evaluator.feed(test.expression + ";");
         } catch (const LogicalError &err) {
+            hasThrown = true;
+
+            EXPECT_STREQ(err.what(), test.errorMessage.c_str());
+        } catch (const SyntaxError &err) {
             hasThrown = true;
 
             EXPECT_STREQ(err.what(), test.errorMessage.c_str());

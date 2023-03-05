@@ -15,14 +15,14 @@ struct SyntaxErrorTest
 
 static void testParserError(const std::vector<SyntaxErrorTest> &expected)
 {
-    for (const auto &expect : expected) {
+    for (const auto &expect: expected) {
         std::cout << expect.description << std::endl;
 
         Parser parser;
         bool hasThrown = false;
 
         try {
-            parser.feed(expect.expression);
+            parser.feed(expect.expression + ";");
         } catch (const SyntaxError &err) {
             hasThrown = true;
 
@@ -76,7 +76,7 @@ TEST(ParserTest, InvalidSyntaxExpressions)
         SyntaxErrorTest{
             .description = "5. No opening parenthesis with expression",
             .expression = "1 + 1)",
-            .errorMessage = "Syntax error: line 0, col 5: \")\": unexpected token.",
+            .errorMessage = "Syntax error: line 0, col 5: \")\": unmatched parenthesis.",
             .lexeme = ")",
             .line = 0,
             .column = 5
@@ -184,6 +184,54 @@ TEST(ParserTest, InvalidEqualityExpressions)
             .lexeme = "+",
             .line = 0,
             .column = 2
+        }
+    };
+
+    testParserError(expected);
+}
+
+TEST(ParserTest, DeclarationsAndAssignments)
+{
+    const std::vector<SyntaxErrorTest> expected{
+        SyntaxErrorTest{
+            .description = "1. Invalid identifier #1",
+            .expression = "int 1n = 1;",
+            .errorMessage = "Syntax error: line 0, col 0: \"int\": expecting identifier.",
+            .lexeme = "int",
+            .line = 0,
+            .column = 0
+        },
+        SyntaxErrorTest{
+            .description = "2. Invalid identifier #2",
+            .expression = "1n = 1;",
+            .errorMessage = "Syntax error: line 0, col 1: \"n\": unexpected identifier.",
+            .lexeme = "n",
+            .line = 0,
+            .column = 1
+        },
+        SyntaxErrorTest{
+            .description = "3. Invalid identifier #3",
+            .expression = "1n1 + 1;",
+            .errorMessage = "Syntax error: line 0, col 1: \"n1\": unexpected identifier.",
+            .lexeme = "n1",
+            .line = 0,
+            .column = 1
+        },
+        SyntaxErrorTest{
+            .description = "4. Invalid identifier #4",
+            .expression = "1+1n1;",
+            .errorMessage = "Syntax error: line 0, col 3: \"n1\": unexpected identifier.",
+            .lexeme = "n1",
+            .line = 0,
+            .column = 3
+        },
+        SyntaxErrorTest{
+            .description = "5. Expecting expression",
+            .expression = "int n; int a = int n;",
+            .errorMessage = "Syntax error: line 0, col 13: \"=\": expecting expression.",
+            .lexeme = "=",
+            .line = 0,
+            .column = 13
         }
     };
 

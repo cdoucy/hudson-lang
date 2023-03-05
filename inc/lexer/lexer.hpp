@@ -13,8 +13,7 @@ class Lexer
 
         void feed(const std::string &expression);
 
-        [[nodiscard]] Token::ptr getNextToken() const noexcept;
-        void popToken() noexcept;
+        [[nodiscard]] Token::queue &getTokens() noexcept;
 
         [[nodiscard]] std::size_t tokensCount() const noexcept;
 
@@ -28,21 +27,24 @@ class Lexer
         Token::queue _queue;
         std::size_t _line;
         std::size_t _column;
+        Token::ptr _previousToken;
 
 
         bool lex(std::string::const_iterator &begin);
 
+        bool lexProgrammingWord(std::string::const_iterator &begin);
         bool lexIntegerLiteral(std::string::const_iterator &begin);
         bool lexOperator(std::string::const_iterator &begin);
 
-        template<Token::Type T>
-        void pushToken(const std::string &lexeme)
-        {
-            this->_queue.push(Token::create<T>(lexeme, this->_line, this->_column));
-            this->_column += lexeme.size();
-        }
 
-        void pushToken(Token::Type t, const std::string::const_iterator &begin, long lexemeSize);
+        void pushToken(Token::Type t, const std::string &lexeme);
+        void pushToken(
+            Token::Type t,
+            std::string::const_iterator &it,
+            long lexemeSize
+        );
 
         std::vector<LexerFunction> createLexerFunctions();
+
+        static bool isProgrammingWord(char c);
 };
