@@ -50,6 +50,9 @@ namespace runtime
             explicit operator bool() const;
             Object &operator=(const Object &other) = default;
 
+            [[nodiscard]] std::string string() const noexcept;
+            [[nodiscard]] std::string getValueAsString() const noexcept;
+
         private:
             std::string _identifier;
             Token::Type _type;

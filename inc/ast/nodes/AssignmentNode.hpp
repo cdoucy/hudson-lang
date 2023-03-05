@@ -9,11 +9,11 @@ namespace ast
     {
         public:
             using ptr = std::shared_ptr<AssignmentNode>;
-            static ptr create(const std::string &identifier, const ExpressionNode::ptr &expression = nullptr);
+            static ptr create(const std::string &identifier, const ExpressionNode::ptr &expression);
 
             explicit AssignmentNode(
                 std::string identifier,
-                ExpressionNode::ptr expression = nullptr
+                ExpressionNode::ptr expression
             );
 
             ~AssignmentNode() final = default;

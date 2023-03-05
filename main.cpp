@@ -6,7 +6,6 @@
 void runInteractiveMode()
 {
     Repl repl;
-
     repl.run();
 }
 
