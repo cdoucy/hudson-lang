@@ -4,7 +4,8 @@
 #include "token.hpp"
 
 static const std::unordered_map<Token::Type, std::string> tokenTypesString{
-    {Token::INTEGER, "int"}
+    {Token::INT, "int"},
+    {Token::UINT, "uint"}
 };
 
 static const std::string unknownType{"unknown"};

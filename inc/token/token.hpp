@@ -33,13 +33,16 @@ class Token
             INTEGER,
 
             // Keywords
-            LET, INT_TYPE,
+            LET, INT, UINT, INT8, UINT8,
 
             // Identifier
             IDENTIFIER
         };
 
         using Integer = int;
+        using UInteger = unsigned int;
+        using Int8 = int8_t;
+        using UInt8 = uint8_t;
 
     public:
         using ptr = std::shared_ptr<Token>;

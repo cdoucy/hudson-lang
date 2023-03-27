@@ -72,7 +72,7 @@ ast::StatementNode::ptr Parser::parseExpressionStatement()
 ast::StatementNode::ptr Parser::parseDeclaration()
 {
     auto token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::INT_TYPE))
+    if (!token || (!token->isType(Token::INT) && !token->isType(Token::UINT)))
         return nullptr;
 
     Token::Type declarationType = token->getType();

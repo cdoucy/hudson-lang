@@ -152,7 +152,7 @@ TEST(LexerTest, KeyWords)
             .description = "2. Simple int",
             .expression = "int",
             .expected = {
-                Token{Token::INT_TYPE, "int"}
+                Token{Token::INT, "int"}
             }
         }
     };

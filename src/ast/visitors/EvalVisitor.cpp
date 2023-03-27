@@ -117,23 +117,21 @@ void ast::EvalVisitor::visit(ast::ExpressionStatementNode &node)
 
 void ast::EvalVisitor::visit(ast::DeclarationNode &node)
 {
-    Token::Integer value = 0;
+    runtime::Object obj(node.getType(), node.getIdentifier());
     const auto &expression = node.getExpression();
 
-    if (expression)
-        value = this->evaluateChild(node.getExpression());
+    if (expression) {
+        this->evaluate(expression);
+        obj.assign(this->_expressionResult);
+    }
 
-    runtime::Object object(value, node.getIdentifier());
-
-    this->_state.set(node.getIdentifier(), object);
+    this->_state.set(node.getIdentifier(), obj);
 }
 
 void ast::EvalVisitor::visit(ast::AssignmentNode &node)
 {
     auto &object = this->_state.get(node.getIdentifier());
-    auto value = this->evaluateChild(node.getExpression());
-
-    object.set(value);
+    object.assign(this->evaluate(node.getExpression()));
 }
 
 void ast::EvalVisitor::visit(ast::ProgramNode &program)
