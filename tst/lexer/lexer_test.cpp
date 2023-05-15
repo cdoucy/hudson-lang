@@ -132,10 +132,63 @@ TEST(LexerTest, ValidExpressions)
                 Token{Token::MINUS, "-"},
                 Token{Token::INTEGER, "777"},
             },
-        }
+        },
     };
 
     testLexer(testCases);
+}
+
+TEST(LexerTest, Strings)
+{
+    struct LexerStringTest
+    {
+        std::string description;
+        std::string expression;
+        Token expected;
+        std::string expectedValue;
+    };
+
+    const std::vector<LexerStringTest> testCases{
+        LexerStringTest{
+            .description = "1. String literal",
+            .expression = "\"toto\"",
+            .expected   = {Token::STRING, "\"toto\""},
+            .expectedValue = "toto",
+        },
+        LexerStringTest{
+            .description = "2. String literal with double quotes inside",
+            .expression = "\"{\\\"foo\\\": \\\"bar\\\", \\\"count\\\": 10}\"",
+            .expected   = Token{Token::STRING, "\"{\\\"foo\\\": \\\"bar\\\", \\\"count\\\": 10}\""},
+            .expectedValue = "{\"foo\": \"bar\", \"count\": 10}"
+        },
+        LexerStringTest{
+            .description = "3. Empty string literal",
+            .expression = "\"\"",
+            .expected   = Token{Token::STRING, "\"\""},
+            .expectedValue = "",
+        },
+        LexerStringTest{
+            .description = "4. String literal with escaped characters",
+            .expression = "\" \\ \\n \\a\\b \\t \\n \\v \\\" \\f \\r \\\\ \\\\n \"",
+            .expected   = Token{Token::STRING, "\" \\ \\n \\a\\b \\t \\n \\v \\\" \\f \\r \\\\ \\\\n \""},
+            .expectedValue = " \\ \n \a\b \t \n \v \" \f \r \\ \\n ",
+        },
+    };
+
+    for (const auto &testCase: testCases) {
+        std::cout << testCase.description << std::endl;
+        Lexer lexer;
+
+        lexer.feed(testCase.expression);
+
+        Token::Iterator tokenItr(lexer.getTokens());
+
+            auto token = tokenItr.get();
+
+            EXPECT_TRUE(token.has_value());
+            EXPECT_EQ(*token, testCase.expected);
+            EXPECT_STREQ(token->getLiteral<Token::String>().c_str(), testCase.expectedValue.c_str());
+    }
 }
 
 TEST(LexerTest, KeyWords)
@@ -153,6 +206,13 @@ TEST(LexerTest, KeyWords)
             .expression = "int",
             .expected = {
                 Token{Token::INT_TYPE, "int"}
+            }
+        },
+        LexerTest{
+            .description = "3. Simple str",
+            .expression = "str",
+            .expected = {
+                Token{Token::STR_TYPE, "str"}
             }
         }
     };
@@ -231,6 +291,14 @@ TEST(LexerTest, InvalidExpressions)
             .lexeme = "@",
             .line = 1,
             .column = 24
+        },
+        LexerErrorTest{
+            .description = "3. Unmatched double quote",
+            .expression = " \"tutu ",
+            .errorMessage = "Lexical error: line 0, col 1: \"\"tutu \": unmatched double quote.",
+            .lexeme = "\"tutu ",
+            .line = 0,
+            .column = 1
         }
     };
 

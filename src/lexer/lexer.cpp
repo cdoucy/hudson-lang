@@ -1,5 +1,4 @@
 #include "lexer.hpp"
-#include "string.hpp"
 
 #define LEXER_FUNCTION(lexerFunc) ([this](std::string::const_iterator &begin) {return this->lexerFunc(begin);})
 
@@ -14,6 +13,7 @@ Lexer::Lexer()
 std::vector<Lexer::LexerFunction> Lexer::createLexerFunctions()
 {
     return std::vector<Lexer::LexerFunction> {
+        LEXER_FUNCTION(lexStringLiteral),
         LEXER_FUNCTION(lexIntegerLiteral),
         LEXER_FUNCTION(lexOperator),
         LEXER_FUNCTION(lexProgrammingWord)
@@ -22,9 +22,11 @@ std::vector<Lexer::LexerFunction> Lexer::createLexerFunctions()
 
 void Lexer::feed(const std::string &expression)
 {
-    auto it = expression.begin();
+    this->_expression = expression;
 
-    while (it != expression.end()) {
+    auto it = this->_expression.cbegin();
+
+    while (it != this->_expression.cend()) {
         if (*it == '\n') {
             this->_line++;
             this->_column = 0;

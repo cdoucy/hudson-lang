@@ -72,7 +72,7 @@ ast::StatementNode::ptr Parser::parseExpressionStatement()
 ast::StatementNode::ptr Parser::parseDeclaration()
 {
     auto token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::INT_TYPE))
+    if (!token || (!token->isType(Token::INT_TYPE) && !token->isType(Token::STR_TYPE)))
         return nullptr;
 
     Token::Type declarationType = token->getType();
@@ -245,6 +245,7 @@ ast::ExpressionNode::ptr Parser::parsePrimary()
 {
     static const std::vector<ast::ExpressionNode::ptr(Parser::*)()> primaryParsers{
         &Parser::parseInteger,
+        &Parser::parseString,
         &Parser::parseIdentifier,
         &Parser::parseGrouping
     };
@@ -267,6 +268,16 @@ ast::ExpressionNode::ptr Parser::parseInteger()
 
     this->_tokenItr.advance();
     return ast::IntegerNode::create(token->getIntegerLiteral());
+}
+
+ast::ExpressionNode::ptr Parser::parseString()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::STRING))
+        return nullptr;
+
+    this->_tokenItr.advance();
+    return ast::StringNode::create(token->getLiteral<Token::String>());
 }
 
 ast::ExpressionNode::ptr Parser::parseIdentifier()

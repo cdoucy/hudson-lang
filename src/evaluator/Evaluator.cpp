@@ -20,6 +20,7 @@ Token::Integer Evaluator::getResult() const noexcept
 void Evaluator::clear() noexcept
 {
     this->_parser.clear();
+    this->_evalVisitor.clearState();
 }
 
 const runtime::State &Evaluator::getState() const noexcept

@@ -17,6 +17,8 @@ namespace runtime
             [[nodiscard]] std::optional<Object> get(const std::string &identifier) const noexcept;
             void set(const std::string &identifier, const Object &object);
 
+            void clear() noexcept;
+
         private:
             std::unordered_map<std::string, Object::ptr> _state;
     };

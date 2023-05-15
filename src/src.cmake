@@ -15,7 +15,6 @@ set(SOURCES
 
     ${PROJECT_ROOT}/src/evaluator/Evaluator.cpp
 
-    ${PROJECT_ROOT}/src/util/string.cpp
     ${PROJECT_ROOT}/src/util/map.cpp
 
     ${PROJECT_ROOT}/src/error/InterpreterError.cpp
@@ -30,6 +29,7 @@ set(SOURCES
     ${PROJECT_ROOT}/src/ast/nodes/DeclarationNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/AssignmentNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/IdentifierNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/StringNode.cpp
 
     ${PROJECT_ROOT}/src/ast/visitors/EvalVisitor.cpp
 

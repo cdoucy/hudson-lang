@@ -370,6 +370,26 @@ TEST(EvaluatorTest, ComparisonExpressions)
             .description = "8. Priority #4",
             .expression = "(1 == 50 * 2 + 10) < 31 * 3 / 3 - (31 + 1) + 2",
             .expectedResult = 1
+        },
+        EvaluatorTest{
+            .description = "9. Strings comparison #1",
+            .expression = "\"tutu\" == \"tutu\"",
+            .expectedResult = 1,
+        },
+        EvaluatorTest{
+            .description = "10. Strings comparison #2",
+            .expression = "\"tutu\" != \"tutu\"",
+            .expectedResult = 0,
+        },
+        EvaluatorTest{
+            .description = "11. Strings comparison #3",
+            .expression = "\"tutu\" == \"toto\"",
+            .expectedResult = 0,
+        },
+        EvaluatorTest{
+            .description = "12. Strings comparison #4",
+            .expression = "\"toto\" != \"tutu\"",
+            .expectedResult = 1,
         }
     };
 
@@ -555,6 +575,24 @@ TEST(EvaluatorTest, DeclarationAndAssignment)
                 {"b", 2169720},
             },
             .result = 2169720
+        },
+        Test{
+            .description = "12. Integer Comparisons",
+            .expression = "int a = 42; int b; b = 42; a == b;",
+            .expected = {
+                {"a", 42},
+                {"b", 42},
+            },
+            .result = 1
+        },
+        Test{
+            .description = "13. String Comparisons",
+            .expression = "str a = \"tutu\"; str b; b = \"tutu\"; a != b;",
+            .expected = {
+                {"a", runtime::Object("tutu")},
+                {"b", runtime::Object("tutu")},
+            },
+            .result = 0,
         }
     };
 
@@ -575,6 +613,75 @@ TEST(EvaluatorTest, DeclarationAndAssignment)
             if (test.result) {
                 EXPECT_EQ(evaluator.getResult(), *test.result);
             }
+        }
+    }
+}
+
+TEST(EvaluatorTest, String)
+{
+    struct Test{
+        std::string description;
+        std::string expression;
+        std::unordered_map<std::string, runtime::Object> expected;
+        std::optional<std::string> result;
+
+    };
+
+    std::vector<Test> testCases{
+        Test{
+            .description = "1. String declaration without expression",
+            .expression = "str s;",
+            .expected = {
+                {"s", std::string()}
+            },
+            .result = std::nullopt
+        },
+        Test{
+            .description = "2. String declaration with empty string",
+            .expression = "str s = \"\";",
+            .expected = {
+                {"s", std::string()}
+            },
+            .result = "",
+        },
+        Test{
+            .description = "3. String declaration non empty string",
+            .expression = "str s = \"tutu\";",
+            .expected = {
+                {"s", std::string("tutu")}
+            },
+            .result = "tutu"
+        },
+        Test{
+            .description = "4. String concat",
+            .expression = "\"foo\" + \"bar\";",
+            .expected = {},
+            .result = "foobar"
+        },
+        Test{
+            .description = "5. String concat #2",
+            .expression = "str s = \"foo\" + \"bar\"; str s2 = s + \"tutu\"; s2 + \" \" + s;",
+            .expected = {
+                {"s", std::string("foobar")},
+                {"s", std::string("foobartutu")},
+            },
+            .result = "foobartutu foobar"
+        }
+    };
+
+    for (const auto &test : testCases) {
+        std::cout << test.description << std::endl;
+        Evaluator evaluator;
+
+        evaluator.feed(test.expression);
+
+        const auto &state = evaluator.getState();
+
+        for (const auto &[identifier, expected] : test.expected) {
+            const auto &obj = state.get(identifier);
+
+            EXPECT_EQ(obj->getType(), Token::STR_TYPE);
+            EXPECT_EQ(obj->get<Token::String>(), expected.get<Token::String>());
         }
     }
 }
@@ -657,6 +764,36 @@ TEST(EvaluatorTest, EvaluatorError)
             .description = "14. Identifier already defined #4",
             .expression = "int n = 1; int x = n; int n = x; x = n",
             .errorMessage = "Logical error: n: identifier already defined."
+        },
+        EvaluatorErrorTest{
+            .description = "15. Type incompatibility #1",
+            .expression = "int n = \"\";",
+            .errorMessage = "Logical error: type int is not compatible with type str."
+        },
+        EvaluatorErrorTest{
+            .description = "16. Type incompatibility #2",
+            .expression = "str s = 42;",
+            .errorMessage = "Logical error: type str is not compatible with type int."
+        },
+        EvaluatorErrorTest{
+            .description = "17. Type incompatibility #3",
+            .expression = "int n = 42; n = \"coucou\";",
+            .errorMessage = "Logical error: type int is not compatible with type str."
+        },
+        EvaluatorErrorTest{
+            .description = "18. Type incompatibility #4",
+            .expression = "str s = \"yo\"; int n = 42; n == s;",
+            .errorMessage = "Logical error: type int is not compatible with type str."
+        },
+        EvaluatorErrorTest{
+            .description = "19. Type incompatibility #5",
+            .expression = "str s = \"yo\"; int n = 42; s - n;",
+            .errorMessage = "Logical error: type str doesn't implement operator -."
+        },
+        EvaluatorErrorTest{
+            .description = "20. Type incompatibility #6",
+            .expression = "str s = \"yo\"; int n = 42; n + 42 + s + 84;",
+            .errorMessage = "Logical error: type int is not compatible with type str."
         }
     };
 
