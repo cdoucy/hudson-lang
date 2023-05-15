@@ -40,6 +40,7 @@ class Parser
         ast::ExpressionNode::ptr parseUnary();
         ast::ExpressionNode::ptr parsePrimary();
         ast::ExpressionNode::ptr parseInteger();
+        ast::ExpressionNode::ptr parseString();
         ast::ExpressionNode::ptr parseIdentifier();
         ast::ExpressionNode::ptr parseGrouping();
 

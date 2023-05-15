@@ -2,7 +2,7 @@
 
 runtime::Object runtime::Object::operator%(const Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     auto l = this->getInteger();
     auto r = right.getInteger();
@@ -17,7 +17,7 @@ runtime::Object runtime::Object::operator%(const Object &right) const
 
 runtime::Object runtime::Object::operator/(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     auto l = this->getInteger();
     auto r = right.getInteger();
@@ -32,135 +32,145 @@ runtime::Object runtime::Object::operator/(const runtime::Object &right) const
 
 runtime::Object runtime::Object::operator*(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() * right.getInteger();
 }
 
 runtime::Object runtime::Object::operator+(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() + right.getInteger();
 }
 
 runtime::Object runtime::Object::operator-(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() - right.getInteger();
 }
 
 runtime::Object runtime::Object::operator==(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() == right.getInteger();
 }
 
 runtime::Object runtime::Object::operator!=(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() != right.getInteger();
 }
 
 runtime::Object runtime::Object::operator>(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() > right.getInteger();
 }
 
 runtime::Object runtime::Object::operator>=(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() >= right.getInteger();
 }
 
 runtime::Object runtime::Object::operator<(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() < right.getInteger();
 }
 
 runtime::Object runtime::Object::operator<=(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() <= right.getInteger();
 }
 
 runtime::Object runtime::Object::operator|(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() | right.getInteger();
 }
 
 runtime::Object runtime::Object::operator^(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() ^ right.getInteger();
 }
 
 runtime::Object runtime::Object::operator&(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() & right.getInteger();
 }
 
 runtime::Object runtime::Object::operator<<(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() << right.getInteger();
 }
 
 runtime::Object runtime::Object::operator>>(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INTEGER);
+    assertTypesEqual(right, Token::INT_TYPE);
 
     return this->getInteger() >> right.getInteger();
 }
 
 runtime::Object runtime::Object::operator+() const
 {
-    assertTypeEqual(Token::INTEGER);
+    assertTypeEqual(Token::INT_TYPE);
 
     return +this->getInteger();
 }
 
 runtime::Object runtime::Object::operator-() const
 {
-    assertTypeEqual(Token::INTEGER);
+    assertTypeEqual(Token::INT_TYPE);
 
     return -this->getInteger();
 }
 
 runtime::Object runtime::Object::operator!() const
 {
-    assertTypeEqual(Token::INTEGER);
+    assertTypeEqual(Token::INT_TYPE);
 
     return !this->getInteger();
 }
 
 runtime::Object runtime::Object::operator~() const
 {
-    assertTypeEqual(Token::INTEGER);
+    assertTypeEqual(Token::INT_TYPE);
 
     return ~this->getInteger();
 }
 
 runtime::Object::operator bool() const
 {
-    assertTypeEqual(Token::INTEGER);
+    assertTypeEqual(Token::INT_TYPE);
 
     return this->getInteger();
+}
+
+
+runtime::Object &runtime::Object::assign(const runtime::Object &rv)
+{
+    assertTypeEqual(rv.getType());
+
+    this->_raw = rv._raw;
+
+    return *this;
 }
 
 bool runtime::Object::isTypeEqual(Token::Type type) const noexcept

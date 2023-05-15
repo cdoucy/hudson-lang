@@ -2,6 +2,7 @@
 
 #include "IVisitor.hpp"
 #include "IntegerNode.hpp"
+#include "StringNode.hpp"
 #include "BinaryNode.hpp"
 #include "ExpressionNode.hpp"
 #include "UnaryNode.hpp"
@@ -26,6 +27,7 @@ namespace ast
             ~EvalVisitor() final = default;
 
             void visit(IntegerNode &node) final;
+            void visit(StringNode &node) final;
             void visit(BinaryNode &node) final;
             void visit(UnaryNode &node) final;
             void visit(LogicalNode &node) final;

@@ -27,13 +27,15 @@ class Lexer
         Token::queue _queue;
         std::size_t _line;
         std::size_t _column;
-        Token::ptr _previousToken;
 
+        // TODO: iterator
+        std::string _expression;
 
         bool lex(std::string::const_iterator &begin);
 
         bool lexProgrammingWord(std::string::const_iterator &begin);
         bool lexIntegerLiteral(std::string::const_iterator &begin);
+        bool lexStringLiteral(std::string::const_iterator &begin);
         bool lexOperator(std::string::const_iterator &begin);
 
 

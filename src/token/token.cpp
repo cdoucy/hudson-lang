@@ -30,7 +30,7 @@ Token::Integer Token::getIntegerLiteral() const
     if (this->_type != INTEGER)
         throw InternalError("token type is not integer");
 
-    return std::any_cast<Integer>(this->_literalValue);
+    return this->getLiteral<Integer>();
 }
 
 bool Token::operator==(const Token &other) const
@@ -38,9 +38,14 @@ bool Token::operator==(const Token &other) const
     if (this->_type != other.getType())
         return false;
 
+    if (this->_lexeme != other._lexeme)
+        return false;
+
     switch (this->_type) {
         case Token::INTEGER:
-            return this->getIntegerLiteral() == other.getIntegerLiteral();
+            return this->getLiteral<Integer>() == other.getLiteral<Integer>();
+        case Token::STRING:
+            return this->getLiteral<String>() == other.getLiteral<String>();
         default:
             return true;
     }
@@ -51,6 +56,8 @@ std::any Token::literalFromLexeme(Token::Type type, const std::string &lexeme)
     switch (type) {
         case INTEGER:
             return Token::integerFromLexeme(lexeme);
+        case STRING:
+            return Token::stringFromLexeme(lexeme);
         default:
             return nullptr;
     }
@@ -67,6 +74,42 @@ Token::Integer Token::integerFromLexeme(const std::string &lexeme)
     }
 
     return value;
+}
+
+Token::String Token::stringFromLexeme(const std::string &lexeme)
+{
+    String escaped;
+
+    auto it = lexeme.begin() + 1;
+
+    for (; it != lexeme.end() && *it != '"'; ++it) {
+        if (*it != '\\' || it + 1 == lexeme.end()) {
+            escaped += *it;
+            continue;
+        }
+
+        switch (*(++it)) {
+            case '"':   escaped += '"' ;    break;
+            case '\\':  escaped += '\\';    break;
+            case 'a':   escaped += '\a';    break;
+            case 'b':   escaped += '\b';    break;
+            case 't':   escaped += '\t';    break;
+            case 'n':   escaped += '\n';    break;
+            case 'v':   escaped += '\v';    break;
+            case 'f':   escaped += '\f';    break;
+            case 'r':   escaped += '\r';    break;
+
+            default:
+                escaped += '\\';
+                --it;
+                break;
+        }
+    }
+
+    if (it == lexeme.end())
+        throw InternalError("unable to escape lexeme : missing double quote");
+
+    return escaped;
 }
 
 bool Token::isTypeAnyOf(Token::Type type, const std::initializer_list<Token::Type> &types)

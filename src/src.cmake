@@ -30,6 +30,7 @@ set(SOURCES
     ${PROJECT_ROOT}/src/ast/nodes/DeclarationNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/AssignmentNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/IdentifierNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/StringNode.cpp
 
     ${PROJECT_ROOT}/src/ast/visitors/EvalVisitor.cpp
 

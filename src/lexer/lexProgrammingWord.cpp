@@ -3,7 +3,8 @@
 
 static const std::unordered_map<std::string, Token::Type> keywordsTable{
     {"let", Token::LET},
-    {"int", Token::INT_TYPE}
+    {"int", Token::INT_TYPE},
+    {"str", Token::STR_TYPE}
 };
 
 bool Lexer::lexProgrammingWord(std::string::const_iterator &begin)

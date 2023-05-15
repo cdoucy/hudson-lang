@@ -17,10 +17,11 @@ bitshift                -> term (( '>>' | '<<' ) term ) *
 term                    -> factor ( ( '-' | '+' ) factor ) *
 factor                  -> unary ( ( '/' | '*' | '%' ) unary ) *
 unary                   -> ( '+' | '-' | '!' | '~' ) unary | primary
-primary                 -> Integer | Identifier | grouping
+primary                 -> Integer | Identifier | String | grouping
 grouping                -> '(' expression ')'
 
 Integer                 -> ['0'-'9']+
-Type                    -> 'int'
+Type                    -> 'int' | 'str'
 Identifier              -> [a-zA-Z_][a-zA-Z_0-9]*
+String                  -> "*"
 ```

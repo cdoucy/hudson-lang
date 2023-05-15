@@ -13,7 +13,9 @@ namespace runtime
             using Evaluator = std::function<const Object &()>;
 
             Object();
+            Object(Token::Type type, std::string identifier = "");
             Object(Token::Integer i, std::string identifier = "");
+            Object(Token::String s, std::string identifier = "");
             ~Object() = default;
 
             [[nodiscard]] const std::string &getIdentifier() const;
@@ -21,7 +23,23 @@ namespace runtime
 
             [[nodiscard]] Token::Integer getInteger() const;
 
-            void set(Token::Integer i, bool overwriteType = false);
+            template<typename T>
+            [[nodiscard]] T get() const
+            {
+                try {
+                    return std::any_cast<T>(this->_raw);
+                } catch (const std::bad_any_cast &err) {
+                    throw LogicalError(fmt::format("mismatched types : {}", err.what()));
+                }
+            }
+
+            template<typename T>
+            void set(T value)
+            {
+                (void)this->get<T>();
+
+                this->_raw = value;
+            }
 
             // Binary operations
             Object operator%(const Object &right) const;
@@ -49,6 +67,8 @@ namespace runtime
 
             explicit operator bool() const;
             Object &operator=(const Object &other) = default;
+
+            Object &assign(const Object &other);
 
             [[nodiscard]] std::string string() const noexcept;
             [[nodiscard]] std::string getValueAsString() const noexcept;

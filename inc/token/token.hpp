@@ -30,16 +30,17 @@ class Token
             SEMICOLON,
 
             // Literal types
-            INTEGER,
+            INTEGER, STRING,
 
             // Keywords
-            LET, INT_TYPE,
+            LET, INT_TYPE, STR_TYPE,
 
             // Identifier
             IDENTIFIER
         };
 
         using Integer = int;
+        using String = std::string;
 
     public:
         using ptr = std::shared_ptr<Token>;
@@ -57,6 +58,15 @@ class Token
 
         static std::string typeToString(Type type);
 
+        template<typename T>
+        [[nodiscard]] T getLiteral() const
+        {
+            try {
+                return std::any_cast<T>(this->_literalValue);
+            } catch (const std::bad_any_cast &err) {
+                throw InternalError(fmt::format("mismatched types : {}", err.what()));
+            }
+        }
         [[nodiscard]] Integer getIntegerLiteral() const;
 
         [[nodiscard]] const std::string &getLexeme() const noexcept;
@@ -75,6 +85,7 @@ class Token
 
         static std::any literalFromLexeme(Token::Type type, const std::string &lexeme);
         static Integer integerFromLexeme(const std::string &lexeme);
+        static String stringFromLexeme(const std::string &lexeme);
 
     public:
         using queue = std::queue<ptr>;

@@ -3,11 +3,30 @@
 
 #include "Object.hpp"
 
+runtime::Object::Object(Token::Type type, std::string identifier)
+    :   _identifier(std::move(identifier)),
+        _type(type)
+{
+    switch (type) {
+        case Token::INT_TYPE: this->_raw = Token::Integer(0);   break;
+        case Token::STR_TYPE: this->_raw = Token::String();     break;
+        default:
+            throw InternalError("invalid type");
+    }
+}
+
 runtime::Object::Object(Token::Integer i, std::string identifier)
 :   _identifier(std::move(identifier)),
-    _type(Token::INTEGER),
+    _type(Token::INT_TYPE),
     _raw(i)
 {}
+
+runtime::Object::Object(Token::String s, std::string identifier)
+:   _identifier(std::move(identifier)),
+    _type(Token::STR_TYPE),
+    _raw(std::move(s))
+{
+}
 
 const std::string &runtime::Object::getIdentifier() const
 {
@@ -21,20 +40,10 @@ Token::Type runtime::Object::getType() const
 
 Token::Integer runtime::Object::getInteger() const
 {
-    if (this->_type != Token::INTEGER)
+    if (this->_type != Token::INT_TYPE)
         throw InternalError("token type is not integer");
 
     return std::any_cast<Token::Integer>(this->_raw);
-}
-
-void runtime::Object::set(Token::Integer i,  bool overwriteType)
-{
-    if (overwriteType)
-        this->_type = Token::INTEGER;
-    else if (this->_type != Token::INTEGER)
-        throw InternalError("token type is not integer");
-
-    this->_raw = i;
 }
 
 runtime::Object::Object()
@@ -56,8 +65,11 @@ std::string runtime::Object::string() const noexcept
 std::string runtime::Object::getValueAsString() const noexcept
 {
     switch (this->_type) {
-        case Token::INTEGER:
+        case Token::INT_TYPE:
             return fmt::format("{}", this->getInteger());
+
+        case Token::STR_TYPE:
+            return fmt::format("\"{}\"", this->get<Token::String>());
 
         default:
             break;

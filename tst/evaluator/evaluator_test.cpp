@@ -579,6 +579,55 @@ TEST(EvaluatorTest, DeclarationAndAssignment)
     }
 }
 
+TEST(EvaluatorTest, String)
+{
+    struct Test{
+        std::string description;
+        std::string expression;
+        std::unordered_map<std::string, runtime::Object> expected;
+    };
+
+    std::vector<Test> testCases{
+        Test{
+            .description = "1. String declaration without expression",
+            .expression = "str s;",
+            .expected = {
+                {"s", std::string()}
+            }
+        },
+        Test{
+            .description = "2. String declaration with empty string",
+            .expression = "str s = \"\";",
+            .expected = {
+                {"s", std::string()}
+            }
+        },
+        Test{
+            .description = "3. String declaration non empty string",
+            .expression = "str s = \"tutu\";",
+            .expected = {
+                {"s", std::string("tutu")}
+            }
+        }
+    };
+
+    for (const auto &test : testCases) {
+        std::cout << test.description << std::endl;
+        Evaluator evaluator;
+
+        evaluator.feed(test.expression);
+
+        const auto &state = evaluator.getState();
+
+        for (const auto &[identifier, expected] : test.expected) {
+            const auto &obj = state.get(identifier);
+
+            EXPECT_EQ(obj->getType(), Token::STR_TYPE);
+            EXPECT_EQ(obj->get<Token::String>(), expected.get<Token::String>());
+        }
+    }
+}
+
 TEST(EvaluatorTest, EvaluatorError)
 {
     struct EvaluatorErrorTest{
