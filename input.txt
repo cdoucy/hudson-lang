@@ -1,3 +1,9 @@
 int n = 1;
 int b = 2 * n;
 b = 38921 * 2;
+
+str s = "yo";
+
+str s2 = s + "yo" + s;
+
+str string = "yo";

@@ -81,6 +81,6 @@ namespace runtime
             [[nodiscard]] bool isTypeEqual(Token::Type type) const noexcept;
             [[nodiscard]] bool areTypesEqual(const Object &other, Token::Type type) const noexcept;
             void assertTypeEqual(Token::Type type) const;
-            void assertTypesEqual(const Object &other, Token::Type type) const;
+            void assertTypesEqual(const Object &other, Token::Type type, const std::string &oprt = "") const;
     };
 };

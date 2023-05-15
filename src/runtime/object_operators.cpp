@@ -39,30 +39,57 @@ runtime::Object runtime::Object::operator*(const runtime::Object &right) const
 
 runtime::Object runtime::Object::operator+(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INT_TYPE);
+    assertTypeEqual(right.getType());
 
-    return this->getInteger() + right.getInteger();
+    switch (this->getType()) {
+        case Token::INT_TYPE:
+            return this->getInteger() + right.getInteger();
+
+        case Token::STR_TYPE:
+            return this->get<Token::String>() + right.get<Token::String>();
+
+        default:
+            throw LogicalError(fmt::format("type {} doesn't implement operator +", Token::typeToString(this->getType())));
+    }
 }
 
 runtime::Object runtime::Object::operator-(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INT_TYPE);
+    assertTypesEqual(right, Token::INT_TYPE, "-");
 
     return this->getInteger() - right.getInteger();
 }
 
 runtime::Object runtime::Object::operator==(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INT_TYPE);
+    assertTypeEqual(right.getType());
 
-    return this->getInteger() == right.getInteger();
+    switch (this->getType()) {
+        case Token::INT_TYPE:
+            return this->getInteger() == right.getInteger();
+
+        case Token::STR_TYPE:
+            return this->get<Token::String>() == right.get<Token::String>();
+
+        default:
+            throw LogicalError(fmt::format("type {} doesn't implement operator ==", Token::typeToString(this->getType())));
+    }
 }
 
 runtime::Object runtime::Object::operator!=(const runtime::Object &right) const
 {
-    assertTypesEqual(right, Token::INT_TYPE);
+    assertTypeEqual(right.getType());
 
-    return this->getInteger() != right.getInteger();
+    switch (this->getType()) {
+        case Token::INT_TYPE:
+            return this->getInteger() != right.getInteger();
+
+        case Token::STR_TYPE:
+            return this->get<Token::String>() != right.get<Token::String>();
+
+        default:
+            throw LogicalError(fmt::format("type {} doesn't implement operator !=", Token::typeToString(this->getType())));
+    }
 }
 
 runtime::Object runtime::Object::operator>(const runtime::Object &right) const
@@ -186,11 +213,25 @@ bool runtime::Object::areTypesEqual(const Object &other, Token::Type type) const
 void runtime::Object::assertTypeEqual(Token::Type type) const
 {
     if (!this->isTypeEqual(type))
-        throw LogicalError("incompatible type");
+        throw LogicalError(fmt::format(
+            "type {} is not compatible with type {}",
+            Token::typeToString(this->getType()),
+            Token::typeToString(type)
+        ));
 }
 
-void runtime::Object::assertTypesEqual(const Object &other, Token::Type type) const
+void runtime::Object::assertTypesEqual(const Object &other, Token::Type type, const std::string &oprt) const
 {
-    if (!this->areTypesEqual(other, type))
-        throw LogicalError("incompatible type");
+    if (!this->areTypesEqual(other, type)) {
+        if (oprt.empty())
+            throw LogicalError("incompatible type");
+        else
+            throw LogicalError(
+                fmt::format(
+                    "type {} doesn't implement operator {}",
+                    Token::typeToString(this->getType()),
+                    oprt
+                )
+            );
+    }
 }

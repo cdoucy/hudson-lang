@@ -31,3 +31,8 @@ std::optional<runtime::Object> runtime::State::get(const std::string &identifier
 
     return {*found->second};
 }
+
+void runtime::State::clear() noexcept
+{
+    this->_state.clear();
+}

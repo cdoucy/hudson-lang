@@ -15,7 +15,6 @@ set(SOURCES
 
     ${PROJECT_ROOT}/src/evaluator/Evaluator.cpp
 
-    ${PROJECT_ROOT}/src/util/string.cpp
     ${PROJECT_ROOT}/src/util/map.cpp
 
     ${PROJECT_ROOT}/src/error/InterpreterError.cpp

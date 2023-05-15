@@ -1,5 +1,4 @@
 #include "lexer.hpp"
-#include "string.hpp"
 
 #define LEXER_FUNCTION(lexerFunc) ([this](std::string::const_iterator &begin) {return this->lexerFunc(begin);})
 

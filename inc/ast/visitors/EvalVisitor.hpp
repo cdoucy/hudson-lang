@@ -44,6 +44,8 @@ namespace ast
 
             const runtime::State &getState() const noexcept;
 
+            void clearState() noexcept;
+
         private:
             runtime::Object _expressionResult;
             runtime::State _state;

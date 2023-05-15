@@ -164,3 +164,8 @@ const runtime::Object &ast::EvalVisitor::value() const noexcept
 {
     return this->_expressionResult;
 }
+
+void ast::EvalVisitor::clearState() noexcept
+{
+    this->_state.clear();
+}
