@@ -53,10 +53,6 @@ void Repl::interpret(const std::string &line)
         this->_error << err.what() << std::endl;
         return;
     }
-
-    const auto &object = this->_evaluator.getVisitor().value();
-
-    this->_output << object.getValueAsString() << std::endl;
 }
 
 void Repl::debug(const std::string &line)

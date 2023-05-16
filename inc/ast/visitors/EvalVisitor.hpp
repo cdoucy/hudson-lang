@@ -12,6 +12,7 @@
 #include "ExpressionStatementNode.hpp"
 #include "DeclarationNode.hpp"
 #include "AssignmentNode.hpp"
+#include "PrintNode.hpp"
 
 #include "ProgramNode.hpp"
 
@@ -36,6 +37,7 @@ namespace ast
             void visit(ExpressionStatementNode &node) final;
             void visit(DeclarationNode &node) final;
             void visit(AssignmentNode &node) final;
+            void visit(PrintNode &node) final;
 
             void visit(ProgramNode &node) final;
 

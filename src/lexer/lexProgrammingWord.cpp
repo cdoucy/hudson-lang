@@ -2,9 +2,9 @@
 #include "map.hpp"
 
 static const std::unordered_map<std::string, Token::Type> keywordsTable{
-    {"let", Token::LET},
     {"int", Token::INT_TYPE},
-    {"str", Token::STR_TYPE}
+    {"str", Token::STR_TYPE},
+    {"print", Token::PRINT}
 };
 
 bool Lexer::lexProgrammingWord(std::string::const_iterator &begin)

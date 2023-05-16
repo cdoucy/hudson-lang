@@ -195,10 +195,10 @@ TEST(LexerTest, KeyWords)
 {
     const std::vector<LexerTest> testCases{
         LexerTest{
-            .description = "1. Simple let",
-            .expression = "let",
+            .description = "1. Print",
+            .expression = "print",
             .expected = {
-                Token{Token::LET, "let"}
+                Token{Token::PRINT, "print"}
             }
         },
         LexerTest{
@@ -231,10 +231,10 @@ TEST(LexerTest, Identifiers)
             }
         },
         LexerTest{
-            .description = "2. Identifier with let",
-            .expression = "let var_NAME2 = 1",
+            .description = "2. Identifier with int",
+            .expression = "int var_NAME2 = 1",
             .expected = {
-                Token{Token::LET, "let"},
+                Token{Token::INT_TYPE, "int"},
                 Token{Token::IDENTIFIER, "var_NAME2"},
                 Token{Token::ASSIGN, "="},
                 Token{Token::INTEGER, "1"}
@@ -250,9 +250,9 @@ TEST(LexerTest, Identifiers)
         },
         LexerTest{
             .description = "4. Identifier that starts with a keyword",
-            .expression = "let letVAR123_NAMe = 1",
+            .expression = "int letVAR123_NAMe = 1",
             .expected = {
-                Token{Token::LET, "let"},
+                Token{Token::INT_TYPE, "int"},
                 Token{Token::IDENTIFIER, "letVAR123_NAMe"},
                 Token{Token::ASSIGN, "="},
                 Token{Token::INTEGER, "1"}

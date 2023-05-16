@@ -12,6 +12,7 @@ namespace ast
             static ptr create(const Token::String &s);
 
             explicit StringNode(Token::String s);
+            ~StringNode() final = default;
 
             void accept(IVisitor &visitor) override;
 
