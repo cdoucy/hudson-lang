@@ -1,5 +1,5 @@
-#include <functional>
 #include <unordered_map>
+#include <iostream>
 
 #include "EvalVisitor.hpp"
 
@@ -137,6 +137,17 @@ void ast::EvalVisitor::visit(ast::AssignmentNode &node)
     auto value = this->evaluate(node.getExpression());
 
     object.assign(value);
+}
+
+void ast::EvalVisitor::visit(ast::PrintNode &node)
+{
+    const auto &expr = node.getExpression();
+    std::string output;
+
+    if (expr)
+        output = this->evaluate(expr).getValueAsString();
+
+    std::cout << output << std::endl;
 }
 
 void ast::EvalVisitor::visit(ast::ProgramNode &program)

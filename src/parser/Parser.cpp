@@ -33,7 +33,8 @@ ast::StatementNode::ptr Parser::parseStatement()
     static const std::vector<ast::StatementNode::ptr(Parser::*)()> statementsParser{
         &Parser::parseAssignment,
         &Parser::parseExpressionStatement,
-        &Parser::parseDeclaration
+        &Parser::parseDeclaration,
+        &Parser::parsePrint
     };
 
     for (const auto &parse : statementsParser) {
@@ -134,6 +135,26 @@ ast::StatementNode::ptr Parser::parseAssignment()
     this->_tokenItr.advance();
 
     return ast::AssignmentNode::create(identifier, expr);
+}
+
+ast::StatementNode::ptr Parser::parsePrint()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::PRINT))
+        return nullptr;
+
+    this->_tokenItr.advance();
+
+    // Expression is optional in "print" statement, no need to check for nullptr
+    const auto &expr = this->parseExpression();
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+
+    this->_tokenItr.advance();
+
+    return ast::PrintNode::create(expr);
 }
 
 ast::ExpressionNode::ptr Parser::parseExpression()

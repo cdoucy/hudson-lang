@@ -7,3 +7,11 @@ str s = "yo";
 str s2 = s + "yo" + s;
 
 str string = "yo";
+
+print b;
+
+print s;
+
+print s2;
+
+print string;

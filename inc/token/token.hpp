@@ -33,7 +33,8 @@ class Token
             INTEGER, STRING,
 
             // Keywords
-            LET, INT_TYPE, STR_TYPE,
+            INT_TYPE, STR_TYPE,
+            PRINT,
 
             // Identifier
             IDENTIFIER

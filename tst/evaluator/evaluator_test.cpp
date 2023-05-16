@@ -686,6 +686,61 @@ TEST(EvaluatorTest, String)
     }
 }
 
+TEST(EvaluatorTest, Print)
+{
+    struct PrintTest{
+        std::string description;
+        std::string expression;
+        std::string expectedStdout;
+    };
+
+    const std::vector<PrintTest> testCases{
+        PrintTest{
+            .description = "1. Print simple string",
+            .expression = "print \"tutu\";",
+            .expectedStdout = "tutu\n"
+        },
+        PrintTest{
+            .description = "2. Print simple integer",
+            .expression = "print 42;",
+            .expectedStdout = "42\n"
+        },
+        PrintTest{
+            .description = "3. Print expression",
+            .expression = "int n = 3; print (5 + 2) * 3;",
+            .expectedStdout = "21\n"
+        },
+        PrintTest{
+            .description = "4. Print str variable",
+            .expression = "str s = \"yo\"; print s;",
+            .expectedStdout = "yo\n"
+        },
+        PrintTest{
+            .description = "5. Print without arguments",
+            .expression = "print;",
+            .expectedStdout = "\n"
+        },
+        PrintTest{
+            .description = "6. Print chained",
+            .expression = "print 1; print \"yo\";",
+            .expectedStdout = "1\nyo\n"
+        }
+    };
+
+    Evaluator evaluator;
+
+    for (const auto &tc : testCases) {
+        std::cout << tc.description << std::endl;
+        testing::internal::CaptureStdout();
+
+        evaluator.feed(tc.expression);
+
+        const auto &actualStdout = testing::internal::GetCapturedStdout();
+
+        EXPECT_STREQ(actualStdout.c_str(), tc.expectedStdout.c_str());
+    }
+}
+
 TEST(EvaluatorTest, EvaluatorError)
 {
     struct EvaluatorErrorTest{

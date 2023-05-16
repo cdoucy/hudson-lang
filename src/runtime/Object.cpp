@@ -69,7 +69,7 @@ std::string runtime::Object::getValueAsString() const noexcept
             return fmt::format("{}", this->getInteger());
 
         case Token::STR_TYPE:
-            return fmt::format("\"{}\"", this->get<Token::String>());
+            return this->get<Token::String>();
 
         default:
             break;
