@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "IVisitor.hpp"
 #include "IntegerNode.hpp"
 #include "StringNode.hpp"
@@ -24,7 +26,7 @@ namespace ast
     class EvalVisitor final : public IVisitor
     {
         public:
-            EvalVisitor() = default;
+            explicit EvalVisitor(std::ostream &output = std::cout);
             ~EvalVisitor() final = default;
 
             void visit(IntegerNode &node) final;
@@ -49,10 +51,10 @@ namespace ast
             void clearState() noexcept;
 
         private:
+            std::ostream &_output;
             runtime::Object _expressionResult;
             runtime::State _state;
 
-            Token::Integer evaluateChild(const ast::ExpressionNode::ptr &child);
             const runtime::Object &evaluate(const ast::ExpressionNode::ptr &expr);
 
     };

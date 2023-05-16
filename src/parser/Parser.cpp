@@ -145,12 +145,36 @@ ast::StatementNode::ptr Parser::parsePrint()
 
     this->_tokenItr.advance();
 
-    // Expression is optional in "print" statement, no need to check for nullptr
-    const auto &expr = this->parseExpression();
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::OPEN_PARENTHESIS))
+        throw syntaxError("expecting \"()\"", *this->_tokenItr.prev());
+
+    auto leftParen = *token;
+
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+    if (!token)
+        throw syntaxError("expecting \"()\"", leftParen);
+
+    ast::ExpressionNode::ptr expr;
+
+    if (!token->isType(Token::CLOSE_PARENTHESIS)) {
+
+        // Expression is optional in "print" statement, no need to check for nullptr
+        expr = this->parseExpression();
+
+        token = this->_tokenItr.get();
+        if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
+            throw syntaxError("unmatched \")\"", leftParen);
+
+    }
+
+    this->_tokenItr.advance();
 
     token = this->_tokenItr.get();
     if (!token || !token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+        throw syntaxError("expecting \";\"", token ? *token : *this->_tokenItr.prev());
 
     this->_tokenItr.advance();
 

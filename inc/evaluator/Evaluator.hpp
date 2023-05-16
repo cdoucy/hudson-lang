@@ -5,7 +5,7 @@
 class Evaluator
 {
     public:
-        Evaluator() = default;
+        Evaluator(std::ostream &output = std::cout);
         ~Evaluator() = default;
 
         void feed(const std::string &expression);

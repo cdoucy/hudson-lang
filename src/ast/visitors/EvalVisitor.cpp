@@ -1,5 +1,4 @@
 #include <unordered_map>
-#include <iostream>
 
 #include "EvalVisitor.hpp"
 
@@ -105,16 +104,6 @@ Token::Integer ast::EvalVisitor::getResult() const
     return this->_expressionResult.getInteger();
 }
 
-Token::Integer ast::EvalVisitor::evaluateChild(const ast::ExpressionNode::ptr &child)
-{
-    if (!child)
-        throw InternalError("EvalVisitor: child is null");
-
-    child->accept(*this);
-
-    return this->_expressionResult.getInteger();
-}
-
 void ast::EvalVisitor::visit(ast::ExpressionStatementNode &node)
 {
     node.getExpression()->accept(*this);
@@ -147,7 +136,7 @@ void ast::EvalVisitor::visit(ast::PrintNode &node)
     if (expr)
         output = this->evaluate(expr).getValueAsString();
 
-    std::cout << output << std::endl;
+    this->_output << output << std::endl;
 }
 
 void ast::EvalVisitor::visit(ast::ProgramNode &program)
@@ -180,3 +169,7 @@ void ast::EvalVisitor::clearState() noexcept
 {
     this->_state.clear();
 }
+
+ast::EvalVisitor::EvalVisitor(std::ostream &output)
+:   _output(output)
+{}
