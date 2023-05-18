@@ -186,3 +186,16 @@ ast::EvalVisitor::EvalVisitor(std::ostream &output)
     _expressionResult(),
     _state(runtime::State::create())
 {}
+
+void ast::EvalVisitor::visit(ast::WhileNode &node)
+{
+    const auto &stmt = node.getStatement();
+    auto obj = this->evaluate(node.getExpression());
+
+    while (obj) {
+        if (stmt)
+            stmt->accept(*this);
+
+        obj = this->evaluate(node.getExpression());
+    }
+}

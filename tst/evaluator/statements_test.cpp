@@ -124,7 +124,7 @@ TEST(EvaluatorTest, WhilesLoop)
                        "        count = count + 1;  "
                        "    }                       "
                        "                            "
-                       "    print(n);               "
+                       "    print(i);               "
                        "    print(count);           "
                        "}                           ",
             .expectedOutput = "100\n5\n"
@@ -137,7 +137,7 @@ TEST(EvaluatorTest, WhilesLoop)
                        "    n = n + 1;  "
                        "}               "
                        "print(n);       ",
-            .expectedOutput="1\n",
+            .expectedOutput="0\n",
         },
         StatementTest{
             .description = "5. While without expression #1",
@@ -146,6 +146,7 @@ TEST(EvaluatorTest, WhilesLoop)
                        "while { "
                        "    n = n + 1;  "
                        "}               ",
+                       .expectedOutput = "",
             .shouldThrow = true
         },
         StatementTest{
@@ -153,21 +154,25 @@ TEST(EvaluatorTest, WhilesLoop)
             .program = "int n = 0;          "
                        "                    "
                        "while n = n + 1;    ",
+                       .expectedOutput = "",
             .shouldThrow = true
         },
         StatementTest{
             .description = "7. While without expression #3",
             .program = "while;",
+            .expectedOutput = "",
             .shouldThrow = true
         },
         StatementTest{
             .description = "8. While without expression #4",
             .program = "while () {}",
+            .expectedOutput = "",
             .shouldThrow = true
         },
         StatementTest{
             .description = "9. While without expression #4",
             .program = "while () {}",
+            .expectedOutput = "",
             .shouldThrow = true
         },
         StatementTest{

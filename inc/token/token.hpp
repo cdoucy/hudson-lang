@@ -37,7 +37,10 @@ class Token
 
             // Keywords
             INT_TYPE, STR_TYPE,
+
             PRINT,
+
+            WHILE,
 
             // Identifier
             IDENTIFIER

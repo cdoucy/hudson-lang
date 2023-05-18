@@ -28,6 +28,7 @@ class Parser
         ast::StatementNode::ptr parseAssignment();
         ast::StatementNode::ptr parsePrint();
         ast::StatementNode::ptr parseBlock();
+        ast::StatementNode::ptr parseWhile();
         ast::ExpressionNode::ptr parseExpression();
         ast::ExpressionNode::ptr parseLogicalOr();
         ast::ExpressionNode::ptr parseLogicalAnd();

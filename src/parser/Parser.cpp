@@ -35,7 +35,8 @@ ast::StatementNode::ptr Parser::parseStatement()
         &Parser::parseExpressionStatement,
         &Parser::parseDeclaration,
         &Parser::parsePrint,
-        &Parser::parseBlock
+        &Parser::parseBlock,
+        &Parser::parseWhile,
     };
 
     for (const auto &parse : statementsParser) {
@@ -205,6 +206,51 @@ ast::StatementNode::ptr Parser::parseBlock()
     this->_tokenItr.advance();
 
     return ast::BlockNode::create(statements);
+}
+
+ast::StatementNode::ptr Parser::parseWhile()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::WHILE))
+        return nullptr;
+
+    auto whileToken = *token;
+
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+
+    if (!token || !token->isType(Token::OPEN_PARENTHESIS))
+        throw syntaxError("expecting \"(\"", whileToken);
+    this->_tokenItr.advance();
+
+    auto parenToken = *token;
+
+    auto expr = this->parseExpression();
+    if (!expr)
+        throw syntaxError("expecting expression after \"(\"", whileToken);
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("unmatched \"(\"", parenToken);
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+
+    if (!token)
+        throw syntaxError("expecting statement or \";\"", whileToken);
+
+    if (token->isType(Token::SEMICOLON)) {
+        this->_tokenItr.advance();
+        return ast::WhileNode::create(expr);
+    }
+
+    auto stmt = this->parseStatement();
+
+    if (!stmt)
+        throw syntaxError("expecting statement or \";\"", whileToken);
+
+    return ast::WhileNode::create(expr, stmt);
 }
 
 ast::ExpressionNode::ptr Parser::parseExpression()
