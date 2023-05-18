@@ -19,6 +19,8 @@ class Token
         {
             // Operators
             OPEN_PARENTHESIS, CLOSE_PARENTHESIS,
+            OPEN_BRACKET, CLOSE_BRACKET,
+            OPEN_SQ_BRACKET, CLOSE_SQ_BRACKET,
             MOD, DIV, MULT,
             PLUS, MINUS,
             GT, GTE, LT, LTE,
@@ -28,6 +30,7 @@ class Token
             BITWISE_AND, BITWISE_OR, BITWISE_XOR, BITWISE_NOT,
             BITWISE_RSHIFT, BITWISE_LSHIFT,
             SEMICOLON,
+
 
             // Literal types
             INTEGER, STRING,

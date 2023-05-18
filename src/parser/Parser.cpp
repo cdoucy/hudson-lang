@@ -34,7 +34,8 @@ ast::StatementNode::ptr Parser::parseStatement()
         &Parser::parseAssignment,
         &Parser::parseExpressionStatement,
         &Parser::parseDeclaration,
-        &Parser::parsePrint
+        &Parser::parsePrint,
+        &Parser::parseBlock
     };
 
     for (const auto &parse : statementsParser) {
@@ -145,16 +146,65 @@ ast::StatementNode::ptr Parser::parsePrint()
 
     this->_tokenItr.advance();
 
-    // Expression is optional in "print" statement, no need to check for nullptr
-    const auto &expr = this->parseExpression();
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::OPEN_PARENTHESIS))
+        throw syntaxError("expecting \"()\"", *this->_tokenItr.prev());
+
+    auto leftParen = *token;
+
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+    if (!token)
+        throw syntaxError("expecting \"()\"", leftParen);
+
+    ast::ExpressionNode::ptr expr;
+
+    if (!token->isType(Token::CLOSE_PARENTHESIS)) {
+
+        // Expression is optional in "print" statement, no need to check for nullptr
+        expr = this->parseExpression();
+
+        token = this->_tokenItr.get();
+        if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
+            throw syntaxError("unmatched \")\"", leftParen);
+
+    }
+
+    this->_tokenItr.advance();
 
     token = this->_tokenItr.get();
     if (!token || !token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+        throw syntaxError("expecting \";\"", token ? *token : *this->_tokenItr.prev());
 
     this->_tokenItr.advance();
 
     return ast::PrintNode::create(expr);
+}
+
+ast::StatementNode::ptr Parser::parseBlock()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::OPEN_BRACKET))
+        return nullptr;
+
+    auto openToken = *token;
+    this->_tokenItr.advance();
+
+    std::list<ast::StatementNode::ptr> statements;
+    auto stmt = this->parseStatement();
+
+    while (stmt) {
+        statements.push_back(stmt);
+        stmt = this->parseStatement();
+    }
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::CLOSE_BRACKET))
+        throw syntaxError("unmatched '{'", openToken);
+    this->_tokenItr.advance();
+
+    return ast::BlockNode::create(statements);
 }
 
 ast::ExpressionNode::ptr Parser::parseExpression()

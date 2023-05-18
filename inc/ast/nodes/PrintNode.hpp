@@ -14,7 +14,7 @@ namespace ast
             explicit PrintNode(ExpressionNode::ptr expr);
             ~PrintNode() final = default;
 
-            void accept(IVisitor &visitor) override;
+            void accept(IVisitor &visitor) final;
 
             [[nodiscard]] const ExpressionNode::ptr &getExpression() const;
 

@@ -26,7 +26,7 @@ InterpreterError::InterpreterError(std::string &errorMessage, const InterpreterE
 
 }
 
-InternalError::InternalError(const std::string &errorMessage)
+InternalError::InternalError(const std::string &errorMessage) noexcept
 : InterpreterError(INTERNAL_ERROR, errorMessage)
 {}
 

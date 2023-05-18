@@ -1,5 +1,4 @@
 #include <unordered_map>
-#include <iostream>
 
 #include "EvalVisitor.hpp"
 
@@ -97,21 +96,11 @@ void ast::EvalVisitor::visit(ast::LogicalNode &node)
 
 void ast::EvalVisitor::visit(ast::IdentifierNode &node)
 {
-    this->_expressionResult = this->_state.get(node.getIdentifier());
+    this->_expressionResult = this->_state->find(node.getIdentifier());
 }
 
 Token::Integer ast::EvalVisitor::getResult() const
 {
-    return this->_expressionResult.getInteger();
-}
-
-Token::Integer ast::EvalVisitor::evaluateChild(const ast::ExpressionNode::ptr &child)
-{
-    if (!child)
-        throw InternalError("EvalVisitor: child is null");
-
-    child->accept(*this);
-
     return this->_expressionResult.getInteger();
 }
 
@@ -128,12 +117,12 @@ void ast::EvalVisitor::visit(ast::DeclarationNode &node)
     if (expression)
         object.assign(this->evaluate(expression));
 
-    this->_state.set(node.getIdentifier(), object);
+    this->_state->set(node.getIdentifier(), object);
 }
 
 void ast::EvalVisitor::visit(ast::AssignmentNode &node)
 {
-    auto &object = this->_state.get(node.getIdentifier());
+    auto &object = this->_state->find(node.getIdentifier());
     auto value = this->evaluate(node.getExpression());
 
     object.assign(value);
@@ -147,7 +136,18 @@ void ast::EvalVisitor::visit(ast::PrintNode &node)
     if (expr)
         output = this->evaluate(expr).getValueAsString();
 
-    std::cout << output << std::endl;
+    this->_output << output << std::endl;
+}
+
+void ast::EvalVisitor::visit(ast::BlockNode &node)
+{
+    this->_state = runtime::State::create(this->_state);
+
+    for (const auto &stmt : node.getStatements()) {
+        stmt->accept(*this);
+    }
+
+    this->_state = this->_state->restoreParent();
 }
 
 void ast::EvalVisitor::visit(ast::ProgramNode &program)
@@ -168,7 +168,7 @@ const runtime::Object &ast::EvalVisitor::evaluate(const ast::ExpressionNode::ptr
 
 const runtime::State &ast::EvalVisitor::getState() const noexcept
 {
-    return this->_state;
+    return *this->_state;
 }
 
 const runtime::Object &ast::EvalVisitor::value() const noexcept
@@ -178,5 +178,11 @@ const runtime::Object &ast::EvalVisitor::value() const noexcept
 
 void ast::EvalVisitor::clearState() noexcept
 {
-    this->_state.clear();
+    this->_state->clear();
 }
+
+ast::EvalVisitor::EvalVisitor(std::ostream &output)
+:   _output(output),
+    _expressionResult(),
+    _state(runtime::State::create())
+{}

@@ -41,8 +41,11 @@ std::optional<Token> Token::Iterator::prev() const noexcept
 
 Token::Iterator &Token::Iterator::advance()
 {
-    if (this->_tokens.empty())
+    if (this->_tokens.empty()) {
+        this->_prev = std::move(this->_current);
+        this->_current = nullptr;
         return *this;
+    }
 
     if (this->_current)
         this->_prev = std::move(this->_current);

@@ -11,6 +11,7 @@ struct SyntaxErrorTest
     std::string lexeme;
     std::size_t line;
     std::size_t column;
+    bool doNotAddSemi = false;
 };
 
 static void testParserError(const std::vector<SyntaxErrorTest> &expected)
@@ -22,7 +23,12 @@ static void testParserError(const std::vector<SyntaxErrorTest> &expected)
         bool hasThrown = false;
 
         try {
-            parser.feed(expect.expression + ";");
+            auto expression = expect.expression;
+
+            if (!expect.doNotAddSemi)
+                expression += ";";
+
+            parser.feed(expression);
         } catch (const SyntaxError &err) {
             hasThrown = true;
 
@@ -232,6 +238,55 @@ TEST(ParserTest, DeclarationsAndAssignments)
             .lexeme = "=",
             .line = 0,
             .column = 13
+        }
+    };
+
+    testParserError(expected);
+}
+
+TEST(ParserTest, PrintError)
+{
+    const std::vector<SyntaxErrorTest> expected{
+        SyntaxErrorTest{
+            .description = "1. Print without parenthesis",
+            .expression = "print 1;",
+            .errorMessage = "Syntax error: line 0, col 0: \"print\": expecting \"()\".",
+            .lexeme = "print",
+            .line = 0,
+            .column = 0
+        },
+        SyntaxErrorTest{
+            .description = "1. Print without parenthesis and arguments",
+            .expression = "print;",
+            .errorMessage = "Syntax error: line 0, col 0: \"print\": expecting \"()\".",
+            .lexeme = "print",
+            .line = 0,
+            .column = 0
+        },
+        SyntaxErrorTest{
+            .description = "3. Print unmatched left parenthesis",
+            .expression = "print(1",
+            .errorMessage = "Syntax error: line 0, col 5: \"(\": unmatched \")\".",
+            .lexeme = "(",
+            .line = 0,
+            .column = 5
+        },
+        SyntaxErrorTest{
+            .description = "4. Print unmatched right parenthesis",
+            .expression = "print);",
+            .errorMessage = "Syntax error: line 0, col 0: \"print\": expecting \"()\".",
+            .lexeme = "print",
+            .line = 0,
+            .column = 0
+        },
+        SyntaxErrorTest{
+            .description = "5. Print without semicolon",
+            .expression = "print(1)",
+            .errorMessage = "Syntax error: line 0, col 7: \")\": expecting \";\".",
+            .lexeme = ")",
+            .line = 0,
+            .column = 7,
+            .doNotAddSemi = true
         }
     };
 

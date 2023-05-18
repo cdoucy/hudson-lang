@@ -32,3 +32,8 @@ const ast::EvalVisitor &Evaluator::getVisitor() const noexcept
 {
     return this->_evalVisitor;
 }
+
+Evaluator::Evaluator(std::ostream &output)
+:   _parser(),
+    _evalVisitor(output)
+{}

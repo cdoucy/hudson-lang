@@ -1,11 +1,12 @@
 
 ```
 program                 -> statement* EOF
-statement               -> expressionStatement | declaration | assignment | print
+statement               -> expressionStatement | declaration | assignment | print | block
 expressionStatement     -> expression ';'
 declaration             -> Type Identifier ('=' expression)? ';'
 assignment              -> Identifier '=' expression ';'
-print                   -> 'print' (expression)? ';'
+print                   -> 'print('expression?')' ';'
+block                   -> '{' statement* '}'
 expression              -> or
 or                      -> and (( '||' ) and ) *
 and                     -> bitwise_or (( '&&' ) bitwise_or ) *

@@ -19,7 +19,7 @@ class InterpreterError : public std::exception
 class InternalError : public InterpreterError
 {
     public:
-        explicit InternalError(const std::string &errorMessage);
+        explicit InternalError(const std::string &errorMessage) noexcept;
 };
 
 class ProgramError : public InterpreterError

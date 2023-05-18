@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <sstream>
+
 #include "Evaluator.hpp"
 
 struct EvaluatorTest
@@ -602,7 +604,7 @@ TEST(EvaluatorTest, DeclarationAndAssignment)
 
         evaluator.feed(test.expression);
 
-        const auto &state = evaluator.getState();
+        auto &state = evaluator.getState();
 
         for (const auto &[identifier, expected] : test.expected) {
             const auto &obj = state.get(identifier);
@@ -697,32 +699,32 @@ TEST(EvaluatorTest, Print)
     const std::vector<PrintTest> testCases{
         PrintTest{
             .description = "1. Print simple string",
-            .expression = "print \"tutu\";",
+            .expression = "print(\"tutu\");",
             .expectedStdout = "tutu\n"
         },
         PrintTest{
             .description = "2. Print simple integer",
-            .expression = "print 42;",
+            .expression = "print(42);",
             .expectedStdout = "42\n"
         },
         PrintTest{
             .description = "3. Print expression",
-            .expression = "int n = 3; print (5 + 2) * 3;",
+            .expression = "int n = 3; print((5 + 2) * 3);",
             .expectedStdout = "21\n"
         },
         PrintTest{
             .description = "4. Print str variable",
-            .expression = "str s = \"yo\"; print s;",
+            .expression = "str s = \"yo\"; print(s);",
             .expectedStdout = "yo\n"
         },
         PrintTest{
             .description = "5. Print without arguments",
-            .expression = "print;",
+            .expression = "print();",
             .expectedStdout = "\n"
         },
         PrintTest{
             .description = "6. Print chained",
-            .expression = "print 1; print \"yo\";",
+            .expression = "print(1); print(\"yo\");",
             .expectedStdout = "1\nyo\n"
         }
     };
@@ -733,7 +735,14 @@ TEST(EvaluatorTest, Print)
         std::cout << tc.description << std::endl;
         testing::internal::CaptureStdout();
 
-        evaluator.feed(tc.expression);
+        try {
+            evaluator.feed(tc.expression);
+        } catch (const std::exception &err) {
+            auto _ = testing::internal::GetCapturedStdout();
+            std::cerr << err.what() << std::endl;
+            EXPECT_TRUE(false);
+            continue;
+        }
 
         const auto &actualStdout = testing::internal::GetCapturedStdout();
 
@@ -874,5 +883,83 @@ TEST(EvaluatorTest, EvaluatorError)
         EXPECT_TRUE(hasThrown);
 
         evaluator.clear();
+    }
+}
+
+TEST(EvaluatorTest, Blocks)
+{
+    struct BlockTest{
+        std::string description;
+        std::string program;
+        std::string expectedOutput;
+        bool shouldThrow = false;
+    };
+
+    const std::vector<BlockTest> testCases {
+        BlockTest{
+            .description = "1. No block",
+            .program = "int n = 1; print(n);",
+            .expectedOutput = "1\n"
+        },
+        BlockTest{
+            .description = "2. Basic block",
+            .program = "{ int n = 1; print(n); }",
+            .expectedOutput = "1\n"
+        },
+        BlockTest{
+            .description = "3. Double block",
+            .program = "{ int n = 1 ; { print(n); } }",
+            .expectedOutput = "1\n"
+        },
+        BlockTest{
+            .description = "4. Double block error",
+            .program = "{ { str s = \"yo\"; } print(s); } ",
+            .expectedOutput = "",
+            .shouldThrow = true
+        },
+        BlockTest{
+            .description = "5. Shadowing",
+            .program = "{                                           "
+                       "    str s = \"yo\";                         "
+                       "    {                                       "
+                       "        str s = \"tutu\";                   "
+                       "        {                                   "
+                       "            print(s);                       "
+                       "        }                                   "
+                       "        s = \"toto\";                       "
+                       "        print(s);                           "
+                       "    }                                       "
+                       "    print(s);                               "
+                       "}                                           ",
+            .expectedOutput = "tutu\ntoto\nyo\n",
+        },
+        BlockTest{
+            .description = "6. Assigning in sub block",
+            .program = "{                                           "
+                       "    int n = 42;                             "
+                       "    {                                       "
+                       "        n = 84;                             "
+                       "    }                                       "
+                       "    print(n);                               "
+                       "}                                           ",
+            .expectedOutput = "84\n"
+
+        }
+    };
+
+    for (const auto &tc : testCases) {
+        std::cout << tc.description << std::endl;
+
+        std::ostringstream out;
+
+        Evaluator evaluator(out);
+
+        if (tc.shouldThrow) {
+            EXPECT_THROW(evaluator.feed(tc.program), LogicalError);
+            continue;
+        }
+
+        EXPECT_NO_THROW(evaluator.feed(tc.program));
+        EXPECT_STREQ(out.str().c_str(), tc.expectedOutput.c_str());
     }
 }
