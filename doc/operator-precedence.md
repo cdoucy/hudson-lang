@@ -1,12 +1,15 @@
 
 ```
 program                 -> statement* EOF
-statement               -> expressionStatement | declaration | assignment | print | block
+statement               -> expressionStatement | declaration | assignment | print | block | while | for | if
 expressionStatement     -> expression ';'
 declaration             -> Type Identifier ('=' expression)? ';'
 assignment              -> Identifier '=' expression ';'
 print                   -> 'print('expression?')' ';'
 block                   -> '{' statement* '}'
+while                   -> 'while' '(' expression ')' (statement | ';' )
+for                     -> 'for' '(' (declaration | assignment) | ';' expression ';' expression? ')' (statement | ';')
+if                      -> 'if' '(' expression ')' statement ('else if' statement)* ('else' statement)?
 expression              -> or
 or                      -> and (( '||' ) and ) *
 and                     -> bitwise_or (( '&&' ) bitwise_or ) *
