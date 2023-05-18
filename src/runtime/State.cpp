@@ -1,15 +1,31 @@
 #include <fmt/format.h>
 
+#include <utility>
+
 #include "State.hpp"
 
-runtime::Object &runtime::State::get(const std::string &identifier)
+std::optional<std::reference_wrapper<runtime::Object>> runtime::State::tryFind(const std::string &identifier) noexcept
 {
-    const auto &object = this->_state.find(identifier);
+    const auto &found = this->_state.find(identifier);
 
-    if (object == this->_state.end())
+    if (found == this->_state.end()) {
+        if (this->_parent)
+            return this->_parent->tryFind(identifier);
+
+        return {};
+    }
+
+    return std::make_optional(std::ref(*found->second));
+}
+
+runtime::Object &runtime::State::find(const std::string &identifier)
+{
+    auto found = this->tryFind(identifier);
+
+    if (!found)
         throw LogicalError(fmt::format("{}: undefined identifier", identifier));
 
-    return *object->second;
+    return found.value().get();
 }
 
 void runtime::State::set(const std::string &identifier, const runtime::Object &object)
@@ -22,6 +38,16 @@ void runtime::State::set(const std::string &identifier, const runtime::Object &o
     this->_state.insert({identifier, std::make_unique<Object>(object)});
 }
 
+void runtime::State::clear() noexcept
+{
+    this->_state.clear();
+}
+
+runtime::State::~State()
+{
+    this->clear();
+}
+
 std::optional<runtime::Object> runtime::State::get(const std::string &identifier) const noexcept
 {
     const auto &found = this->_state.find(identifier);
@@ -32,7 +58,33 @@ std::optional<runtime::Object> runtime::State::get(const std::string &identifier
     return {*found->second};
 }
 
-void runtime::State::clear() noexcept
+runtime::State::ptr runtime::State::create(const runtime::State::ptr& parent)
 {
-    this->_state.clear();
+    if (parent) {
+        return std::make_shared<State>(parent);
+    }
+
+    return std::make_shared<State>();
+}
+
+runtime::State::State(runtime::State::ptr parent)
+:   _parent(std::move(parent))
+{
+}
+
+runtime::State::State()
+:   _parent(nullptr)
+{
+}
+
+runtime::State::ptr runtime::State::restoreParent()
+{
+    if (!this->_parent)
+        throw InternalError("State::restoreParent invoked on a null parent");
+
+    auto parent = std::move(this->_parent);
+
+    this->_parent = nullptr;
+
+    return parent;
 }

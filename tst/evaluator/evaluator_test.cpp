@@ -604,7 +604,7 @@ TEST(EvaluatorTest, DeclarationAndAssignment)
 
         evaluator.feed(test.expression);
 
-        const auto &state = evaluator.getState();
+        auto &state = evaluator.getState();
 
         for (const auto &[identifier, expected] : test.expected) {
             const auto &obj = state.get(identifier);
@@ -926,13 +926,12 @@ TEST(EvaluatorTest, Blocks)
                        "        {                                   "
                        "            print(s);                       "
                        "        }                                   "
-                       "        s = \"toto\"                        "
+                       "        s = \"toto\";                       "
                        "        print(s);                           "
                        "    }                                       "
                        "    print(s);                               "
                        "}                                           ",
-            .expectedOutput = "tutu\ntoto\nyo",
-            .shouldThrow = true
+            .expectedOutput = "tutu\ntoto\nyo\n",
         },
         BlockTest{
             .description = "6. Assigning in sub block",

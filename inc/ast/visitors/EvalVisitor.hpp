@@ -15,6 +15,7 @@
 #include "DeclarationNode.hpp"
 #include "AssignmentNode.hpp"
 #include "PrintNode.hpp"
+#include "BlockNode.hpp"
 
 #include "ProgramNode.hpp"
 
@@ -40,6 +41,7 @@ namespace ast
             void visit(DeclarationNode &node) final;
             void visit(AssignmentNode &node) final;
             void visit(PrintNode &node) final;
+            void visit(BlockNode &node) final;
 
             void visit(ProgramNode &node) final;
 
@@ -53,7 +55,7 @@ namespace ast
         private:
             std::ostream &_output;
             runtime::Object _expressionResult;
-            runtime::State _state;
+            runtime::State::ptr _state;
 
             const runtime::Object &evaluate(const ast::ExpressionNode::ptr &expr);
 

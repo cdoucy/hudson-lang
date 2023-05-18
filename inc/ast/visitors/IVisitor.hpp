@@ -14,6 +14,7 @@ namespace ast
     class DeclarationNode;
     class AssignmentNode;
     class PrintNode;
+    class BlockNode;
 
     class ProgramNode;
 
@@ -33,6 +34,7 @@ namespace ast
             virtual void visit(DeclarationNode &node) = 0;
             virtual void visit(AssignmentNode &node) = 0;
             virtual void visit(PrintNode &node) = 0;
+            virtual void visit(BlockNode &node) = 0;
 
             virtual void visit(ProgramNode &node) = 0;
     };

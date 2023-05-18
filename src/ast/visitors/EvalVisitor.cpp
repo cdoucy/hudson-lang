@@ -96,7 +96,7 @@ void ast::EvalVisitor::visit(ast::LogicalNode &node)
 
 void ast::EvalVisitor::visit(ast::IdentifierNode &node)
 {
-    this->_expressionResult = this->_state.get(node.getIdentifier());
+    this->_expressionResult = this->_state->find(node.getIdentifier());
 }
 
 Token::Integer ast::EvalVisitor::getResult() const
@@ -117,12 +117,12 @@ void ast::EvalVisitor::visit(ast::DeclarationNode &node)
     if (expression)
         object.assign(this->evaluate(expression));
 
-    this->_state.set(node.getIdentifier(), object);
+    this->_state->set(node.getIdentifier(), object);
 }
 
 void ast::EvalVisitor::visit(ast::AssignmentNode &node)
 {
-    auto &object = this->_state.get(node.getIdentifier());
+    auto &object = this->_state->find(node.getIdentifier());
     auto value = this->evaluate(node.getExpression());
 
     object.assign(value);
@@ -137,6 +137,17 @@ void ast::EvalVisitor::visit(ast::PrintNode &node)
         output = this->evaluate(expr).getValueAsString();
 
     this->_output << output << std::endl;
+}
+
+void ast::EvalVisitor::visit(ast::BlockNode &node)
+{
+    this->_state = runtime::State::create(this->_state);
+
+    for (const auto &stmt : node.getStatements()) {
+        stmt->accept(*this);
+    }
+
+    this->_state = this->_state->restoreParent();
 }
 
 void ast::EvalVisitor::visit(ast::ProgramNode &program)
@@ -157,7 +168,7 @@ const runtime::Object &ast::EvalVisitor::evaluate(const ast::ExpressionNode::ptr
 
 const runtime::State &ast::EvalVisitor::getState() const noexcept
 {
-    return this->_state;
+    return *this->_state;
 }
 
 const runtime::Object &ast::EvalVisitor::value() const noexcept
@@ -167,9 +178,11 @@ const runtime::Object &ast::EvalVisitor::value() const noexcept
 
 void ast::EvalVisitor::clearState() noexcept
 {
-    this->_state.clear();
+    this->_state->clear();
 }
 
 ast::EvalVisitor::EvalVisitor(std::ostream &output)
-:   _output(output)
+:   _output(output),
+    _expressionResult(),
+    _state(runtime::State::create())
 {}

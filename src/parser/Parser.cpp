@@ -34,7 +34,8 @@ ast::StatementNode::ptr Parser::parseStatement()
         &Parser::parseAssignment,
         &Parser::parseExpressionStatement,
         &Parser::parseDeclaration,
-        &Parser::parsePrint
+        &Parser::parsePrint,
+        &Parser::parseBlock
     };
 
     for (const auto &parse : statementsParser) {
@@ -179,6 +180,31 @@ ast::StatementNode::ptr Parser::parsePrint()
     this->_tokenItr.advance();
 
     return ast::PrintNode::create(expr);
+}
+
+ast::StatementNode::ptr Parser::parseBlock()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::OPEN_BRACKET))
+        return nullptr;
+
+    auto openToken = *token;
+    this->_tokenItr.advance();
+
+    std::list<ast::StatementNode::ptr> statements;
+    auto stmt = this->parseStatement();
+
+    while (stmt) {
+        statements.push_back(stmt);
+        stmt = this->parseStatement();
+    }
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::CLOSE_BRACKET))
+        throw syntaxError("unmatched '{'", openToken);
+    this->_tokenItr.advance();
+
+    return ast::BlockNode::create(statements);
 }
 
 ast::ExpressionNode::ptr Parser::parseExpression()

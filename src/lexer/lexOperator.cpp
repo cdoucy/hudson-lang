@@ -30,6 +30,18 @@ static const std::unordered_map<char, Tok> tokenTable{
         ')', {Token::CLOSE_PARENTHESIS, {}}
     },
     {
+        '{', {Token::OPEN_BRACKET, {}}
+    },
+    {
+        '}', {Token::CLOSE_BRACKET, {}}
+    },
+    {
+        '[', {Token::OPEN_SQ_BRACKET, {}}
+    },
+    {
+        ']', {Token::CLOSE_SQ_BRACKET, {}}
+    },
+    {
         '^', {Token::BITWISE_XOR, {}}
     },
     {
