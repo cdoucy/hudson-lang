@@ -22,6 +22,11 @@ FetchContent_MakeAvailable(fmt)
 set(CMAKE_CXX_FLAGS "-std=c++20 -Wpedantic -Wall -Wextra ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g3 ${CMAKE_CXX_FLAGS_DEBUG}")
 
+if (${CMAKE_BUILD_TYPE} STREQUAL "test")
+    add_subdirectory(tst)
+    return()
+endif()
+
 add_executable(
     ${TARGET}
     ${SOURCES}
@@ -37,7 +42,3 @@ target_link_libraries(
     ${TARGET}
     fmt::fmt
 )
-
-if (${CMAKE_BUILD_TYPE} STREQUAL "test")
-    add_subdirectory(tst)
-endif()

@@ -1,0 +1,17 @@
+name: Continuous Integration
+
+on: [pull_request]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: unit tests
+        run: make run-test
+
+      - name: code coverage
+        run: |
+          pip3 install gcovr > /dev/null
+          make coverage

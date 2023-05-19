@@ -214,6 +214,13 @@ TEST(LexerTest, KeyWords)
             .expected = {
                 Token{Token::STR_TYPE, "str"}
             }
+        },
+        LexerTest{
+            .description = "4. Simple while",
+            .expression = "while",
+            .expected = {
+                Token{Token::WHILE, "while"}
+            }
         }
     };
 

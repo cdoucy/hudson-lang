@@ -1,21 +1,25 @@
-int a = 0;
 
-print(a);
+int i = 0;
 
-{
-    print(a);
-
-    int b = 2;
-
-    print(b);
-
-    a = b;
-
-    {
-        int a = 3;
-        print(a);
-    }
+while (i < 0) {
+    i = i + 1;
 
 }
 
-print(a);
+print(i);
+
+print("coucou");
+
+int count = 0;
+
+while (i < 100) {
+    int j = 0;
+    while (j < 20) {
+        j = j + 1;
+    }
+    i = i + j;
+    count = count + 1;
+}
+
+print(i);
+print(count);
