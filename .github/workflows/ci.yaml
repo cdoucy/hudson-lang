@@ -12,4 +12,6 @@ jobs:
         run: make run-test
 
       - name: code coverage
-        run: make coverage
+        run: |
+          pip3 install gcovr > /dev/null
+          make coverage
