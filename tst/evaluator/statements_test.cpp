@@ -29,7 +29,7 @@ void testStatements(const std::vector<StatementTest> &testCases)
     }
 }
 
-TEST(EvaluatorTest, Blocks)
+TEST(StatementTest, Blocks)
 {
     const std::vector<StatementTest> testCases {
         StatementTest{
@@ -86,7 +86,7 @@ TEST(EvaluatorTest, Blocks)
     testStatements(testCases);
 }
 
-TEST(EvaluatorTest, WhilesLoop)
+TEST(StatementTest, WhilesLoop)
 {
     const std::vector<StatementTest> testCases{
         StatementTest{
@@ -140,43 +140,7 @@ TEST(EvaluatorTest, WhilesLoop)
             .expectedOutput="0\n",
         },
         StatementTest{
-            .description = "5. While without expression #1",
-            .program = "int n = 0;      "
-                       "                "
-                       "while { "
-                       "    n = n + 1;  "
-                       "}               ",
-                       .expectedOutput = "",
-            .shouldThrow = true
-        },
-        StatementTest{
-            .description = "6. While without expression #2",
-            .program = "int n = 0;          "
-                       "                    "
-                       "while n = n + 1;    ",
-                       .expectedOutput = "",
-            .shouldThrow = true
-        },
-        StatementTest{
-            .description = "7. While without expression #3",
-            .program = "while;",
-            .expectedOutput = "",
-            .shouldThrow = true
-        },
-        StatementTest{
-            .description = "8. While without expression #4",
-            .program = "while () {}",
-            .expectedOutput = "",
-            .shouldThrow = true
-        },
-        StatementTest{
-            .description = "9. While without expression #4",
-            .program = "while () {}",
-            .expectedOutput = "",
-            .shouldThrow = true
-        },
-        StatementTest{
-            .description = "10. While without statement",
+            .description = "5. While without statement",
             .program = "int n = 0;          "
                        "while (n == 1);     "
                        "print(n);           ",

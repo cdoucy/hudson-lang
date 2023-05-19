@@ -20,7 +20,6 @@ static void testParserError(const std::vector<SyntaxErrorTest> &expected)
         std::cout << expect.description << std::endl;
 
         Parser parser;
-        bool hasThrown = false;
 
         try {
             auto expression = expect.expression;
@@ -30,7 +29,6 @@ static void testParserError(const std::vector<SyntaxErrorTest> &expected)
 
             parser.feed(expression);
         } catch (const SyntaxError &err) {
-            hasThrown = true;
 
             EXPECT_STREQ(err.what(), expect.errorMessage.c_str());
             EXPECT_STREQ(err.getLexeme().c_str(), expect.lexeme.c_str());
@@ -38,9 +36,11 @@ static void testParserError(const std::vector<SyntaxErrorTest> &expected)
             EXPECT_EQ(err.getColumn(), expect.column);
 
             parser.clear();
+            SUCCEED();
+            continue;
         }
 
-        EXPECT_TRUE(hasThrown);
+        FAIL();
     }
 }
 
@@ -291,4 +291,50 @@ TEST(ParserTest, PrintError)
     };
 
     testParserError(expected);
+}
+
+TEST(ParserTest, WhileError)
+{
+    const std::vector<SyntaxErrorTest> testCases{
+        SyntaxErrorTest{
+            .description = "1. While without expression #1",
+            .expression = "int n = 0;      "
+                       "                "
+                       "while { "
+                       "    n = n + 1;  "
+                       "}               ",
+            .errorMessage = "Syntax error: line 0, col 32: \"while\": expecting \"(\".",
+            .lexeme = "while",
+            .line = 0,
+            .column = 32
+        },
+        SyntaxErrorTest{
+            .description = "2. While without expression #2",
+            .expression = "int n = 0;          "
+                       "                    "
+                       "while n = n + 1;    ",
+            .errorMessage = "Syntax error: line 0, col 40: \"while\": expecting \"(\".",
+            .lexeme = "while",
+            .line = 0,
+            .column = 40
+        },
+        SyntaxErrorTest{
+            .description = "3. While without expression #3",
+            .expression = "while;",
+            .errorMessage = "Syntax error: line 0, col 0: \"while\": expecting \"(\".",
+            .lexeme = "while",
+            .line = 0,
+            .column = 0
+        },
+        SyntaxErrorTest{
+            .description = "4. While without expression #4",
+            .expression = "while () {}",
+            .errorMessage = "Syntax error: line 0, col 0: \"while\": expecting expression after \"(\".",
+            .lexeme = "while",
+            .line = 0,
+            .column = 0
+        }
+    };
+
+    testParserError(testCases);
 }

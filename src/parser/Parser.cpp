@@ -226,6 +226,12 @@ ast::StatementNode::ptr Parser::parseWhile()
 
     auto parenToken = *token;
 
+    token = this->_tokenItr.get();
+    if (!token)
+        throw syntaxError("expecting expression after \"(\"", whileToken);
+    if (token->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("expecting expression after \"(\"", whileToken);
+
     auto expr = this->parseExpression();
     if (!expr)
         throw syntaxError("expecting expression after \"(\"", whileToken);
