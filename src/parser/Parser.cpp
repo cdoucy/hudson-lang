@@ -37,6 +37,7 @@ ast::StatementNode::ptr Parser::parseStatement()
         &Parser::parsePrint,
         &Parser::parseBlock,
         &Parser::parseWhile,
+        &Parser::parseConditions,
     };
 
     for (const auto &parse : statementsParser) {
@@ -217,32 +218,9 @@ ast::StatementNode::ptr Parser::parseWhile()
     auto whileToken = *token;
 
     this->_tokenItr.advance();
+    auto expr = this->parseParenthesizedExpression(whileToken);
 
     token = this->_tokenItr.get();
-
-    if (!token || !token->isType(Token::OPEN_PARENTHESIS))
-        throw syntaxError("expecting \"(\"", whileToken);
-    this->_tokenItr.advance();
-
-    auto parenToken = *token;
-
-    token = this->_tokenItr.get();
-    if (!token)
-        throw syntaxError("expecting expression after \"(\"", whileToken);
-    if (token->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("expecting expression after \"(\"", whileToken);
-
-    auto expr = this->parseExpression();
-    if (!expr)
-        throw syntaxError("expecting expression after \"(\"", whileToken);
-
-    token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("unmatched \"(\"", parenToken);
-    this->_tokenItr.advance();
-
-    token = this->_tokenItr.get();
-
     if (!token)
         throw syntaxError("expecting statement or \";\"", whileToken);
 
@@ -257,6 +235,34 @@ ast::StatementNode::ptr Parser::parseWhile()
         throw syntaxError("expecting statement or \";\"", whileToken);
 
     return ast::WhileNode::create(expr, stmt);
+}
+
+ast::StatementNode::ptr Parser::parseConditions()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::IF))
+        return nullptr;
+
+    auto ifToken = *token;
+    this->_tokenItr.advance();
+    auto ifExpr = this->parseParenthesizedExpression(ifToken);
+
+    auto ifStmt = this->parseStatement();
+    if (!ifStmt)
+        throw syntaxError("expecting statement", ifToken);
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::ELSE))
+        return ast::ConditionNode::create(ifExpr, ifStmt);
+    this->_tokenItr.advance();
+
+    auto elseToken = *token;
+
+    auto elseStmt = this->parseStatement();
+    if (!elseStmt)
+        throw syntaxError("expecting statement", elseToken);
+
+    return ast::ConditionNode::create(ifExpr, ifStmt, elseStmt);
 }
 
 ast::ExpressionNode::ptr Parser::parseExpression()
@@ -480,4 +486,32 @@ ast::ExpressionNode::ptr Parser::parseBinaryExpression(
     }
 
     return expression;
+}
+
+ast::ExpressionNode::ptr Parser::parseParenthesizedExpression(const Token &prevToken)
+{
+    auto token = this->_tokenItr.get();
+
+    if (!token || !token->isType(Token::OPEN_PARENTHESIS))
+        throw syntaxError("expecting \"(\"", prevToken);
+    this->_tokenItr.advance();
+
+    auto parenToken = *token;
+
+    token = this->_tokenItr.get();
+    if (!token)
+        throw syntaxError("expecting expression after \"(\"", prevToken);
+    if (token->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("expecting expression after \"(\"", prevToken);
+
+    auto expr = this->parseExpression();
+    if (!expr)
+        throw syntaxError("expecting expression after \"(\"", prevToken);
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("unmatched \"(\"", parenToken);
+    this->_tokenItr.advance();
+
+    return expr;
 }

@@ -33,6 +33,7 @@ set(SOURCES
     ${PROJECT_ROOT}/src/ast/nodes/PrintNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/BlockNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/WhileNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/ConditionNode.cpp
 
     ${PROJECT_ROOT}/src/ast/visitors/EvalVisitor.cpp
 

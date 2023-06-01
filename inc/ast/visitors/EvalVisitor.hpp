@@ -17,6 +17,7 @@
 #include "PrintNode.hpp"
 #include "BlockNode.hpp"
 #include "WhileNode.hpp"
+#include "ConditionNode.hpp"
 
 #include "ProgramNode.hpp"
 
@@ -44,6 +45,7 @@ namespace ast
             void visit(PrintNode &node) final;
             void visit(BlockNode &node) final;
             void visit(WhileNode &node) final;
+            void visit(ConditionNode &node) final;
 
             void visit(ProgramNode &node) final;
 

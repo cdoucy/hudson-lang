@@ -199,3 +199,15 @@ void ast::EvalVisitor::visit(ast::WhileNode &node)
         obj = this->evaluate(node.getExpression());
     }
 }
+
+void ast::EvalVisitor::visit(ast::ConditionNode &node)
+{
+    const auto &expr = node.getExpression();
+    const auto &ifBranch = node.getIfBranch();
+    const auto &elseBranch = node.getElseBranch();
+
+    if (this->evaluate(expr))
+        ifBranch->accept(*this);
+    else if (elseBranch)
+        elseBranch->accept(*this);
+}

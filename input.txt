@@ -23,3 +23,12 @@ while (i < 100) {
 
 print(i);
 print(count);
+
+i = 0;
+
+if (i > 0)
+    print("i is greater than 0");
+else if (i == 0)
+    print("is is null");
+else
+    print("i is smaller than 0");

@@ -338,3 +338,27 @@ TEST(ParserTest, WhileError)
 
     testParserError(testCases);
 }
+
+TEST(ParserTest, ConditionError)
+{
+    const std::vector<SyntaxErrorTest> testCases{
+        SyntaxErrorTest{
+            .description = "1. If without statement",
+            .expression = "if (1);",
+            .errorMessage = "Syntax error: line 0, col 0: \"if\": expecting statement.",
+            .lexeme = "if",
+            .line = 0,
+            .column = 0
+        },
+        SyntaxErrorTest{
+            .description = "2. Else without statement",
+            .expression = "if (0) { print(1); } else;",
+            .errorMessage = "Syntax error: line 0, col 21: \"else\": expecting statement.",
+            .lexeme = "else",
+            .line = 0,
+            .column = 21
+        }
+    };
+
+    testParserError(testCases);
+}

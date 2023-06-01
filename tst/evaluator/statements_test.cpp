@@ -150,3 +150,68 @@ TEST(StatementTest, WhilesLoop)
 
     testStatements(testCases);
 }
+
+TEST(StatementTest, Conditions)
+{
+    const std::vector<StatementTest> testCases{
+        StatementTest{
+            .description = "1. Basic true if",
+            .program = "if (1) {        "
+                       "    print(1);   "
+                       "}               ",
+            .expectedOutput = "1\n"
+        },
+        StatementTest{
+            .description = "2. Basic false if",
+            .program = "if (0) {        "
+                       "    print(1);   "
+                       "}               ",
+            .expectedOutput = ""
+        },
+        StatementTest{
+            .description = "3. Basic true if else",
+            .program = "int n = 1;          "
+                       "if (n == 1) {       "
+                       "    print(1);       "
+                       "} else {            "
+                       "    print(0);       "
+                       "}                   ",
+            .expectedOutput = "1\n"
+        },
+        StatementTest{
+            .description = "4. Basic false if else",
+            .program = "int n = 0;          "
+                       "if (n == 1) {       "
+                       "    print(1);       "
+                       "} else {            "
+                       "    print(0);       "
+                       "}                   ",
+            .expectedOutput = "0\n"
+        },
+        StatementTest{
+            .description = "5. Basic if else if else",
+            .program = "int n = 2;          "
+                       "if (n == 1) {       "
+                       "    print(1);       "
+                       "} else if (n == 2) {"
+                       "    print(2);       "
+                       "} else {            "
+                       "    print(0);       "
+                       "}                   ",
+            .expectedOutput = "2\n"
+        },
+        StatementTest{
+            .description = "6. If brackets",
+            .program = "int n = 3;          "
+                       "if (n == 1)         "
+                       "    print(1);       "
+                       "else if (n == 2) {  "
+                       "    print(2);       "
+                       "} else              "
+                       "    print(0);       ",
+            .expectedOutput = "0\n"
+        }
+    };
+
+    testStatements(testCases);
+}
