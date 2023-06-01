@@ -221,7 +221,22 @@ TEST(LexerTest, KeyWords)
             .expected = {
                 Token{Token::WHILE, "while"}
             }
+        },
+        LexerTest{
+            .description = "5. if",
+            .expression = "if",
+            .expected = {
+                Token{Token::IF, "if"}
+            }
+        },
+        LexerTest{
+            .description = "4. else",
+            .expression = "else",
+            .expected = {
+                Token{Token::ELSE, "else"}
+            }
         }
+
     };
 
     testLexer(testCases);

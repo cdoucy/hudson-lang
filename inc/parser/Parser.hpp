@@ -29,6 +29,7 @@ class Parser
         ast::StatementNode::ptr parsePrint();
         ast::StatementNode::ptr parseBlock();
         ast::StatementNode::ptr parseWhile();
+        ast::StatementNode::ptr parseConditions();
         ast::ExpressionNode::ptr parseExpression();
         ast::ExpressionNode::ptr parseLogicalOr();
         ast::ExpressionNode::ptr parseLogicalAnd();
@@ -54,6 +55,8 @@ class Parser
             const ParseFunction &parseSubExpression,
             bool logical = false
         );
+
+        ast::ExpressionNode::ptr parseParenthesizedExpression(const Token &previousToken);
 
         static SyntaxError syntaxError(const std::string &errorMessage, const Token &token);
 };

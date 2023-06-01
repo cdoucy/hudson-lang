@@ -41,6 +41,7 @@ class Token
             PRINT,
 
             WHILE,
+            IF, ELSE,
 
             // Identifier
             IDENTIFIER

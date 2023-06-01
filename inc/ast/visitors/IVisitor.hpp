@@ -16,6 +16,7 @@ namespace ast
     class PrintNode;
     class BlockNode;
     class WhileNode;
+    class ConditionNode;
 
     class ProgramNode;
 
@@ -37,6 +38,7 @@ namespace ast
             virtual void visit(PrintNode &node) = 0;
             virtual void visit(BlockNode &node) = 0;
             virtual void visit(WhileNode &node) = 0;
+            virtual void visit(ConditionNode &node) = 0;
 
             virtual void visit(ProgramNode &node) = 0;
     };
