@@ -211,3 +211,22 @@ void ast::EvalVisitor::visit(ast::ConditionNode &node)
     else if (elseBranch)
         elseBranch->accept(*this);
 }
+
+void ast::EvalVisitor::visit(ast::ForNode &node)
+{
+    const auto &expr = node.getExpression();
+    const auto &stmt = node.getStatement();
+    const auto &init = node.getInitStatement();
+    const auto &step = node.getStepStatement();
+
+    if (init)
+        init->accept(*this);
+
+    while (this->evaluate(expr)) {
+        if (stmt)
+            stmt->accept(*this);
+
+        if (step)
+            step->accept(*this);
+    }
+}

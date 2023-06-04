@@ -18,6 +18,7 @@
 #include "BlockNode.hpp"
 #include "WhileNode.hpp"
 #include "ConditionNode.hpp"
+#include "ForNode.hpp"
 
 #include "ProgramNode.hpp"
 
@@ -46,6 +47,7 @@ namespace ast
             void visit(BlockNode &node) final;
             void visit(WhileNode &node) final;
             void visit(ConditionNode &node) final;
+            void visit(ForNode &node) final;
 
             void visit(ProgramNode &node) final;
 

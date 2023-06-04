@@ -6,7 +6,7 @@
 
 namespace ast
 {
-    class DeclarationNode final : public StatementNode
+    class DeclarationNode final : public InitStatementNode
     {
         public:
             using ptr = std::shared_ptr<DeclarationNode>;

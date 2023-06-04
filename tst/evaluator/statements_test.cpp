@@ -215,3 +215,54 @@ TEST(StatementTest, Conditions)
 
     testStatements(testCases);
 }
+
+TEST(StatementTest, ForLoop)
+{
+    const std::vector<StatementTest> testCases{
+        StatementTest{
+            .description = "1. Basic for loop #1",
+            .program = "{"
+                       "    int n = 0;                  "
+                       "    for (int i = 0; i < 10; i = i + 1)"
+                       "        n = i;                  "
+                       "    print(n);                   "
+                       "}",
+            .expectedOutput = "10\n"
+        },
+        StatementTest{
+            .description = "2. Basic for loop #2",
+            .program = "{"
+                       "    int i = 0;                  "
+                       "    for (; i < 10; i = i + 1);        "
+                       "    print(i);                   "
+                       "}",
+            .expectedOutput = "10\n"
+        },
+        StatementTest{
+            .description = "3. Basic for loop #3",
+            .program = "{"
+                       "    int n = 0;                  "
+                       "    for (int i = 10; i < 10;) { "
+                       "        i = i + 1;              "
+                       "        if (i == 10) {          "
+                       "            n = i;              "
+                       "        }                       "
+                       "    }                           "
+                       "    print(n);                   "
+                       "}",
+            .expectedOutput = "10\n"
+        },
+        StatementTest{
+            .description = "4. Basic for loop #4",
+            .program = "{"
+                       "    int n;                              "
+                       "    for (n = 10; n < 20; n = n + 1) {   "
+                       "    }                                   "
+                       "    print(n);                           "
+                       "}",
+            .expectedOutput = "20\n"
+        }
+    };
+
+    testStatements(testCases);
+}

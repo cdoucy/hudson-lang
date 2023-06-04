@@ -5,7 +5,7 @@
 
 namespace ast
 {
-    class AssignmentNode final : public StatementNode
+    class AssignmentNode final : public InitStatementNode, public StepStatementNode
     {
         public:
             using ptr = std::shared_ptr<AssignmentNode>;

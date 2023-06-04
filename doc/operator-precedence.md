@@ -1,14 +1,20 @@
 
 ```
 program                 -> statement* EOF
-statement               -> expressionStatement | declaration | assignment | print | block | while | for | if
+statement               -> expressionStatement | declarationStatement | assignmentStatement | incDecStatement | print | block | while | for | if
 expressionStatement     -> expression ';'
-declaration             -> Type Identifier ('=' expression)? ';'
-assignment              -> Identifier '=' expression ';'
+declarationStatement    -> declaration ';'
+assignementStatement    -> assignement ';'
+incDecStatement         -> incDec ';'
+declaration             -> Type Identifier ('=' expression)?
+assignment              -> Identifier '=' expression
+incDec                  -> Identifier ('++' | '--')
 print                   -> 'print('expression?')' ';'
 block                   -> '{' statement* '}'
 while                   -> 'while' '(' expression ')' (statement | ';' )
-for                     -> 'for' '(' (declaration | assignment) | ';' expression ';' expression? ')' (statement | ';')
+for                     -> 'for' '(' (initStatement)? ';' expression ';' (stepStatement)? ')' (statement | ';')
+initStatement           -> declaration | assignment
+stepStatement           -> assignement | incDec
 if                      -> 'if' '(' expression ')' statement ('else' statement)?
 expression              -> or
 or                      -> and (( '||' ) and ) *
