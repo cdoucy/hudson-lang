@@ -42,6 +42,7 @@ class Token
 
             WHILE,
             IF, ELSE,
+            FOR,
 
             // Identifier
             IDENTIFIER

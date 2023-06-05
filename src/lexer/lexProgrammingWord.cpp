@@ -7,7 +7,8 @@ static const std::unordered_map<std::string, Token::Type> keywordsTable{
     {"print", Token::PRINT},
     {"while", Token::WHILE},
     {"if", Token::IF},
-    {"else", Token::ELSE}
+    {"else", Token::ELSE},
+    {"for", Token::FOR}
 };
 
 bool Lexer::lexProgrammingWord(std::string::const_iterator &begin)

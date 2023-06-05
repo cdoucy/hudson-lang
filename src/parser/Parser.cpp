@@ -31,13 +31,14 @@ ast::ProgramNode::ptr Parser::parseProgram()
 ast::StatementNode::ptr Parser::parseStatement()
 {
     static const std::vector<ast::StatementNode::ptr(Parser::*)()> statementsParser{
-        &Parser::parseAssignment,
+        &Parser::parseAssignmentStatement,
         &Parser::parseExpressionStatement,
-        &Parser::parseDeclaration,
+        &Parser::parseDeclarationStatement,
         &Parser::parsePrint,
         &Parser::parseBlock,
         &Parser::parseWhile,
         &Parser::parseConditions,
+        &Parser::parseFor
     };
 
     for (const auto &parse : statementsParser) {
@@ -73,7 +74,38 @@ ast::StatementNode::ptr Parser::parseExpressionStatement()
     return ast::ExpressionStatementNode::create(expr);
 }
 
-ast::StatementNode::ptr Parser::parseDeclaration()
+ast::StatementNode::ptr Parser::parseDeclarationStatement()
+{
+    auto decl = this->parseDeclaration();
+    if (!decl)
+        return nullptr;
+
+    auto token = this->_tokenItr.get();
+
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+
+    this->_tokenItr.advance();
+
+    return decl;
+}
+
+ast::StatementNode::ptr Parser::parseAssignmentStatement()
+{
+    auto assignment = this->parseAssignment();
+    if (!assignment)
+        return nullptr;
+
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+
+    this->_tokenItr.advance();
+
+    return assignment;
+}
+
+ast::DeclarationNode::ptr Parser::parseDeclaration()
 {
     auto token = this->_tokenItr.get();
     if (!token || (!token->isType(Token::INT_TYPE) && !token->isType(Token::STR_TYPE)))
@@ -90,30 +122,20 @@ ast::StatementNode::ptr Parser::parseDeclaration()
     this->_tokenItr.advance();
 
     token = this->_tokenItr.get();
-    if (!token)
-        throw syntaxError("expecting assignment or \";\"", *this->_tokenItr.prev());
-
     ast::ExpressionNode::ptr expr;
 
-    if (token->isType(Token::ASSIGN)) {
+    if (token && token->isType(Token::ASSIGN)) {
         this->_tokenItr.advance();
 
         expr = this->parseExpression();
         if (!expr)
             throw syntaxError("expecting expression", *token);
-
-        token = this->_tokenItr.get();
     }
-
-    if (!token || !token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
-
-    this->_tokenItr.advance();
 
     return ast::DeclarationNode::create(declarationType, identifier, expr);
 }
 
-ast::StatementNode::ptr Parser::parseAssignment()
+ast::AssignmentNode::ptr Parser::parseAssignment()
 {
     auto token = this->_tokenItr.get();
      if (!token || !token->isType(Token::IDENTIFIER))
@@ -130,12 +152,6 @@ ast::StatementNode::ptr Parser::parseAssignment()
     const auto &expr = this->parseExpression();
     if (!expr)
         throw syntaxError("expecting expression", *token);
-
-    token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
-
-    this->_tokenItr.advance();
 
     return ast::AssignmentNode::create(identifier, expr);
 }
@@ -235,6 +251,77 @@ ast::StatementNode::ptr Parser::parseWhile()
         throw syntaxError("expecting statement or \";\"", whileToken);
 
     return ast::WhileNode::create(expr, stmt);
+}
+
+ast::StatementNode::ptr Parser::parseFor()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::FOR))
+        return nullptr;
+
+    const auto forToken = *token;
+
+    token = this->_tokenItr.advance().get();
+
+    if (!token || !token->isType(Token::OPEN_PARENTHESIS))
+        throw syntaxError("expecting \"(\"", forToken);
+
+    const auto parenToken = *token;
+
+    this->_tokenItr.advance();
+
+    auto initStmt = this->parseInitStatement();
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\" after init statement", *this->_tokenItr.prev());
+    this->_tokenItr.advance();
+
+    auto expr = this->parseExpression();
+    if (!expr)
+        throw syntaxError("expecting expression", *this->_tokenItr.prev());
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\" after expression", *this->_tokenItr.prev());
+    this->_tokenItr.advance();
+
+    auto stepStatement = this->parseStepStatement();
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("unmatched \"(\"", parenToken);
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+    if (!token)
+        throw syntaxError("expecting statement or \";\"", forToken);
+
+    if (token->isType(Token::SEMICOLON)) {
+        this->_tokenItr.advance();
+        return ast::ForNode::create(expr, initStmt, stepStatement);
+    }
+
+    auto stmt = this->parseStatement();
+
+    if (!stmt)
+        throw syntaxError("expecting statement or \";\"", forToken);
+
+    return ast::ForNode::create(expr, initStmt, stepStatement, stmt);
+}
+
+ast::InitStatementNode::ptr Parser::parseInitStatement()
+{
+    auto decl = this->parseDeclaration();
+    if (decl)
+        return decl;
+
+    return this->parseAssignment();
+}
+
+ast::StepStatementNode::ptr Parser::parseStepStatement()
+{
+    return this->parseAssignment();
 }
 
 ast::StatementNode::ptr Parser::parseConditions()
