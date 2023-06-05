@@ -227,7 +227,7 @@ TEST(StatementTest, ForLoop)
                        "        n = i;                  "
                        "    print(n);                   "
                        "}",
-            .expectedOutput = "10\n"
+            .expectedOutput = "9\n"
         },
         StatementTest{
             .description = "2. Basic for loop #2",
@@ -242,7 +242,7 @@ TEST(StatementTest, ForLoop)
             .description = "3. Basic for loop #3",
             .program = "{"
                        "    int n = 0;                  "
-                       "    for (int i = 10; i < 10;) { "
+                       "    for (int i = n; i < 10;) { "
                        "        i = i + 1;              "
                        "        if (i == 10) {          "
                        "            n = i;              "
@@ -261,6 +261,19 @@ TEST(StatementTest, ForLoop)
                        "    print(n);                           "
                        "}",
             .expectedOutput = "20\n"
+        },
+        StatementTest{
+            .description = "5. For loop shadowing",
+            .program = "{"
+                       "    int n = 0;                                  "
+                       "    int i = 42;                                 "
+                       "    for (int i = 0; i < 20; i = i + 1) {        "
+                       "        n = i;                                  "
+                       "    }                                           "
+                       "    print(n);                                   "
+                       "    print(i);                                   "
+                       "}                                               ",
+            .expectedOutput = "19\n42\n"
         }
     };
 

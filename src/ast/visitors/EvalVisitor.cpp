@@ -219,8 +219,10 @@ void ast::EvalVisitor::visit(ast::ForNode &node)
     const auto &init = node.getInitStatement();
     const auto &step = node.getStepStatement();
 
-    if (init)
+    if (init) {
+        this->_state = runtime::State::create(this->_state);
         init->accept(*this);
+    }
 
     while (this->evaluate(expr)) {
         if (stmt)
@@ -229,4 +231,7 @@ void ast::EvalVisitor::visit(ast::ForNode &node)
         if (step)
             step->accept(*this);
     }
+
+    if (init)
+        this->_state = this->_state->restoreParent();
 }

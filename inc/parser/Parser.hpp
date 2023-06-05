@@ -24,11 +24,16 @@ class Parser
         ast::ProgramNode::ptr parseProgram();
         ast::StatementNode::ptr parseStatement();
         ast::StatementNode::ptr parseExpressionStatement();
-        ast::StatementNode::ptr parseDeclaration();
-        ast::StatementNode::ptr parseAssignment();
+        ast::StatementNode::ptr parseDeclarationStatement();
+        ast::StatementNode::ptr parseAssignmentStatement();
+        ast::DeclarationNode::ptr parseDeclaration();
+        ast::AssignmentNode::ptr parseAssignment();
         ast::StatementNode::ptr parsePrint();
         ast::StatementNode::ptr parseBlock();
         ast::StatementNode::ptr parseWhile();
+        ast::StatementNode::ptr parseFor();
+        ast::InitStatementNode::ptr parseInitStatement();
+        ast::StepStatementNode::ptr parseStepStatement();
         ast::StatementNode::ptr parseConditions();
         ast::ExpressionNode::ptr parseExpression();
         ast::ExpressionNode::ptr parseLogicalOr();
