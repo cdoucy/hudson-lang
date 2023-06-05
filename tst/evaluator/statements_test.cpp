@@ -274,6 +274,99 @@ TEST(StatementTest, ForLoop)
                        "    print(i);                                   "
                        "}                                               ",
             .expectedOutput = "19\n42\n"
+        },
+        StatementTest{
+            .description = "6. For loop post incr",
+            .program = "{"
+                       "    int n = 0;                                  "
+                       "    int i = 1;                                  "
+                       "    for (i *= 2; i < 4; i++) {                 "
+                       "        n++                                     "
+                       "    }                                           "
+                       "    print(n);                                   "
+                       "    print(i);                                   "
+                       "}                                               ",
+            .expectedOutput = "2\n4\\n"
+        },
+        StatementTest{
+            .description = "7. For loop incr by 3",
+            .program = "{"
+                       "    int n = 0;                                  "
+                       "    for (int i = 0; i < 10; i += 3) {           "
+                       "        n++                                     "
+                       "    }                                           "
+                       "    print(n);                                   "
+                       "    print(i);                                   "
+                       "}                                               ",
+            .expectedOutput = "3\n12\n"
+        }
+    };
+
+    testStatements(testCases);
+}
+
+TEST(StatementTest, StatementOperator)
+{
+    const std::vector<StatementTest> testCases{
+        StatementTest{
+            .description = "1. Post ++",
+            .program = "int n; n++; print(n);",
+            .expectedOutput = "1\n",
+        },
+        StatementTest{
+            .description = "2. Post --",
+            .program = "int n; n--; print(n);",
+            .expectedOutput = "-1\n",
+        },
+        StatementTest{
+            .description = "3. Assign +=",
+            .program = "int n = 1; n += 9; print(n);",
+            .expectedOutput = "10\n",
+        },
+        StatementTest{
+            .description = "4. Assign -=",
+            .program = "int n = 2; n -= 2; print(n);",
+            .expectedOutput = "0\n",
+        },
+        StatementTest{
+            .description = "5. Assign *=",
+            .program = "int n = 5; n *= n; print(n);",
+            .expectedOutput = "25\n",
+        },
+        StatementTest{
+            .description = "6. Assign /=",
+            .program = "int n = 25; n /= n; print(n);",
+            .expectedOutput = "5\n",
+        },
+        StatementTest{
+            .description = "7. Assign %=",
+            .program = "int n = 28; n %= 5; print(n);",
+            .expectedOutput = "3\n",
+        },
+        StatementTest{
+            .description = "8. Assign >>=",
+            .program = "int n = 8; n >>= 2; print(n);",
+            .expectedOutput = "2\n",
+        },
+        StatementTest{
+            .description = "9. Assign <<=",
+            .program = "int n = 8; n <<= 2; print(n);",
+            .expectedOutput = "32\n",
+        },
+        StatementTest{
+            .description = "10. Assign &=",
+            .program = "int n = 5; n &= 2; print(n);",
+            .expectedOutput = "0\n",
+        },
+        StatementTest{
+            .description = "11. Assign |=",
+            .program = "int n = 42; n |= 17; print(n);",
+            .expectedOutput = "59\n",
+        },
+        StatementTest{
+            .description = "12. Assign ^=",
+            .program = "int n = -13; n ^= 66; print(n);",
+            .expectedOutput = "-79\n",
         }
     };
 
