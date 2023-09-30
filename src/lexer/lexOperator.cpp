@@ -9,19 +9,39 @@ struct Tok
 
 static const std::unordered_map<char, Tok> tokenTable{
     {
-        '%', {Token::MOD, {}}
+        '%', {Token::MOD, {
+                {'=', Token::MOD_GN}
+            }
+        }
     },
     {
-        '/', {Token::DIV, {}}
+        '/', {Token::DIV, {
+                {'=', Token::DIV_GN}
+            }
+        }
     },
     {
-        '*', {Token::MULT, {}}
+        '*', {
+            Token::MULT, {
+                {'=', Token::MULT_GN}
+            }
+        }
     },
     {
-        '+', {Token::PLUS, {}}
+        '+', {
+            Token::PLUS, {
+                {'+', Token::INCR},
+                {'=', Token::PLUS_GN}
+            }
+        }
     },
     {
-        '-', {Token::MINUS, {}}
+        '-', {
+            Token::MINUS, {
+                {'-', Token::DECR},
+                {'=', Token::MINUS_GN}
+            }
+        }
     },
     {
         '(', {Token::OPEN_PARENTHESIS, {}}
@@ -53,7 +73,7 @@ static const std::unordered_map<char, Tok> tokenTable{
     {
         '=', {
             Token::ASSIGN, {
-                {'=', Token::EQUAL}
+                {'=', Token::EQUAL},
             }
         }
     },

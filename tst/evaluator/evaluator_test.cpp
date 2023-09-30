@@ -60,12 +60,12 @@ TEST(EvaluatorTest, ValidExpressions)
         },
         EvaluatorTest{
             .description = "7. Two minus one operand",
-            .expression = "--1",
+            .expression = "- -1",
             .expectedResult = 1
         },
         EvaluatorTest{
             .description = "8. Two plus one operand",
-            .expression = "++1",
+            .expression = "+ +1",
             .expectedResult = 1
         },
         EvaluatorTest{
@@ -80,7 +80,7 @@ TEST(EvaluatorTest, ValidExpressions)
         },
         EvaluatorTest{
             .description = "11. Hardcore chained plus and minus",
-            .expression = "- - - 1 + - 1 - 1 - + - - + - + + - + 1 + ++++++1 -- 1 ++ 1 - 1 + - + - + + + - + - -- +++ - 1",
+            .expression = "- - - 1 + - 1 - 1 - + - - + - + + - + 1 + + + + + + +1 - - 1 + + 1 - 1 + - + - + + + - + - - - + + + - 1",
             .expectedResult = -3
         },
         EvaluatorTest{
