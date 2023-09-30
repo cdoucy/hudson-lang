@@ -8,7 +8,7 @@ assignementStatement    -> assignement ';'
 incDecStatement         -> incDec ';'
 declaration             -> Type Identifier ('=' expression)?
 assignment              -> Identifier assimentOperator expression
-assignmentOperator      -> '=' | '+= | '+-' | '*=' | '?=' | '%=' | '>>=' | '<<=' | '|=' | '^=' | '&='
+assignmentOperator      -> '=' | '+= | '+-' | '*=' | '%=' | '/='
 incDec                  -> Identifier ('++' | '--')
 print                   -> 'print('expression?')' ';'
 block                   -> '{' statement* '}'

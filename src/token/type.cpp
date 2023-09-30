@@ -19,3 +19,22 @@ std::string Token::typeToString(Token::Type type)
 
     return unknownType;
 }
+
+static const std::unordered_map<Token::Type, bool> assignableOperators{
+    {Token::ASSIGN, true},
+    {Token::DIV_GN, true},
+    {Token::MINUS_GN, true},
+    {Token::PLUS_GN, true},
+    {Token::MULT_GN, true},
+    {Token::MOD_GN, true}
+};
+
+bool Token::isAssignableOperator(Token::Type type) noexcept
+{
+    return umap::get(assignableOperators, type).has_value();
+}
+
+bool Token::isAssignableOperator() const noexcept
+{
+    return Token::isAssignableOperator(this->_type);
+}

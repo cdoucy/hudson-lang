@@ -27,7 +27,6 @@ std::optional<Token> Token::Iterator::next() const noexcept
 {
     if (this->_tokens.empty())
         return {};
-
     return std::make_optional<Token>(*this->_tokens.front());
 }
 

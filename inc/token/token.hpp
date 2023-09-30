@@ -30,7 +30,8 @@ class Token
             BITWISE_AND, BITWISE_OR, BITWISE_XOR, BITWISE_NOT,
             BITWISE_RSHIFT, BITWISE_LSHIFT,
             SEMICOLON,
-
+            INCR, DECR,
+            PLUS_GN, MINUS_GN, MULT_GN, DIV_GN, MOD_GN,
 
             // Literal types
             INTEGER, STRING,
@@ -84,6 +85,9 @@ class Token
 
 
         bool operator==(const Token &other) const;
+
+        bool isAssignableOperator() const noexcept;
+        static bool isAssignableOperator(Token::Type type) noexcept;
 
     private:
         Type _type;

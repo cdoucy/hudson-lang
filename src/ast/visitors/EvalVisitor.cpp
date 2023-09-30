@@ -125,7 +125,17 @@ void ast::EvalVisitor::visit(ast::AssignmentNode &node)
     auto &object = this->_state->find(node.getIdentifier());
     auto value = this->evaluate(node.getExpression());
 
-    object.assign(value);
+    switch (node.getOperator()) {
+        case Token::ASSIGN:         object.assign(value); break;
+        case Token::PLUS_GN:           object.assign(object + value); break;
+        case Token::MINUS_GN:          object.assign(object - value); break;
+        case Token::MULT_GN:           object.assign(object * value); break;
+        case Token::DIV_GN:            object.assign(object / value); break;
+        case Token::MOD_GN:            object.assign(object % value); break;
+
+        default:
+            throw InternalError("EvalVisitor : invalid operator in AssignmentNode");
+    }
 }
 
 void ast::EvalVisitor::visit(ast::PrintNode &node)
@@ -234,4 +244,19 @@ void ast::EvalVisitor::visit(ast::ForNode &node)
 
     if (init)
         this->_state = this->_state->restoreParent();
+}
+
+void ast::EvalVisitor::visit(ast::IncrementNode &node)
+{
+    auto &object = this->_state->find(node.getIdentifier());
+
+    switch (node.getOperator()) {
+        default:
+            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
+        case Token::INCR: object.assign(object + 1); break;
+        case Token::DECR: object.assign(object - 1); break;
+
+//        default:
+//            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
+    }
 }

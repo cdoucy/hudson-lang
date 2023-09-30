@@ -18,6 +18,7 @@ namespace ast
     class WhileNode;
     class ConditionNode;
     class ForNode;
+    class IncrementNode;
 
     class ProgramNode;
 
@@ -36,6 +37,7 @@ namespace ast
             virtual void visit(ExpressionStatementNode &node) = 0;
             virtual void visit(DeclarationNode &node) = 0;
             virtual void visit(AssignmentNode &node) = 0;
+            virtual void visit(IncrementNode &node) = 0;
             virtual void visit(PrintNode &node) = 0;
             virtual void visit(BlockNode &node) = 0;
             virtual void visit(WhileNode &node) = 0;

@@ -32,6 +32,7 @@ ast::StatementNode::ptr Parser::parseStatement()
 {
     static const std::vector<ast::StatementNode::ptr(Parser::*)()> statementsParser{
         &Parser::parseAssignmentStatement,
+        &Parser::parseIncrementStatement,
         &Parser::parseExpressionStatement,
         &Parser::parseDeclarationStatement,
         &Parser::parsePrint,
@@ -105,6 +106,36 @@ ast::StatementNode::ptr Parser::parseAssignmentStatement()
     return assignment;
 }
 
+ast::StatementNode::ptr Parser::parseIncrementStatement()
+{
+    auto increment = this->parseIncrement();
+    if (!increment)
+        return nullptr;
+
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+
+    this->_tokenItr.advance();
+
+    return increment;
+}
+
+ast::IncrementNode::ptr Parser::parseIncrement()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::IDENTIFIER))
+        return nullptr;
+
+    auto nextToken = this->_tokenItr.next();
+    if (!nextToken || (!nextToken->isType(Token::INCR) && !nextToken->isType(Token::DECR)))
+        return nullptr;
+
+    this->_tokenItr.advance().advance();
+
+    return ast::IncrementNode::create(token->getLexeme(), nextToken->getType());
+}
+
 ast::DeclarationNode::ptr Parser::parseDeclaration()
 {
     auto token = this->_tokenItr.get();
@@ -141,19 +172,21 @@ ast::AssignmentNode::ptr Parser::parseAssignment()
      if (!token || !token->isType(Token::IDENTIFIER))
         return nullptr;
 
-     if (!this->_tokenItr.next()->isType(Token::ASSIGN))
+     std::string identifier(token->getLexeme());
+
+     auto nextToken = this->_tokenItr.next();
+     if (!nextToken || !nextToken->isAssignableOperator())
          return nullptr;
-
-    std::string identifier(token->getLexeme());
-    token = this->_tokenItr.advance().get();
-
     this->_tokenItr.advance();
 
-    const auto &expr = this->parseExpression();
-    if (!expr)
-        throw syntaxError("expecting expression", *token);
+    token = this->_tokenItr.get();
+    this->_tokenItr.advance();
 
-    return ast::AssignmentNode::create(identifier, expr);
+    auto expr = this->parseExpression();
+    if (!expr)
+        throw syntaxError("expecting expression or operator", *token);
+
+    return ast::AssignmentNode::create(identifier, expr, token->getType());
 }
 
 ast::StatementNode::ptr Parser::parsePrint()
@@ -321,7 +354,12 @@ ast::InitStatementNode::ptr Parser::parseInitStatement()
 
 ast::StepStatementNode::ptr Parser::parseStepStatement()
 {
-    return this->parseAssignment();
+    auto assignment = this->parseAssignment();
+
+    if (assignment)
+        return assignment;
+
+    return this->parseIncrement();
 }
 
 ast::StatementNode::ptr Parser::parseConditions()

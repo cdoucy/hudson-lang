@@ -2,6 +2,7 @@
 
 #include "StatementNode.hpp"
 #include "ExpressionNode.hpp"
+#include "token.hpp"
 
 namespace ast
 {
@@ -9,11 +10,16 @@ namespace ast
     {
         public:
             using ptr = std::shared_ptr<AssignmentNode>;
-            static ptr create(const std::string &identifier, const ExpressionNode::ptr &expression);
+            static ptr create(
+                const std::string &identifier,
+                const ExpressionNode::ptr &expression,
+                Token::Type op = Token::ASSIGN
+            );
 
             explicit AssignmentNode(
                 std::string identifier,
-                ExpressionNode::ptr expression
+                ExpressionNode::ptr expression,
+                Token::Type op = Token::ASSIGN
             );
 
             ~AssignmentNode() final = default;
@@ -22,9 +28,11 @@ namespace ast
 
             [[nodiscard]] const std::string &getIdentifier() const;
             [[nodiscard]] const ExpressionNode::ptr &getExpression() const;
+            [[nodiscard]] Token::Type getOperator() const;
 
         private:
             std::string _identifier;
             ExpressionNode::ptr _expression;
+            Token::Type _op;
     };
 };

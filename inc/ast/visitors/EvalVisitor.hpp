@@ -19,6 +19,7 @@
 #include "WhileNode.hpp"
 #include "ConditionNode.hpp"
 #include "ForNode.hpp"
+#include "IncrementNode.hpp"
 
 #include "ProgramNode.hpp"
 
@@ -48,6 +49,7 @@ namespace ast
             void visit(WhileNode &node) final;
             void visit(ConditionNode &node) final;
             void visit(ForNode &node) final;
+            void visit(IncrementNode &node) final;
 
             void visit(ProgramNode &node) final;
 
