@@ -31,6 +31,7 @@ ast::ProgramNode::ptr Parser::parseProgram()
 ast::StatementNode::ptr Parser::parseStatement()
 {
     static const std::vector<ast::StatementNode::ptr(Parser::*)()> statementsParser{
+        &Parser::parseFunction,
         &Parser::parseAssignmentStatement,
         &Parser::parseIncrementStatement,
         &Parser::parseExpressionStatement,
@@ -40,11 +41,10 @@ ast::StatementNode::ptr Parser::parseStatement()
         &Parser::parseWhile,
         &Parser::parseConditions,
         &Parser::parseFor,
-        &Parser::parseReturnStatement,
-        &Parser::parseFunction
+        &Parser::parseReturnStatement
     };
 
-    for (const auto &parse : statementsParser) {
+    for (const auto &parse: statementsParser) {
         const auto &stmt = (this->*parse)();
         if (stmt)
             return stmt;
@@ -188,14 +188,14 @@ ast::DeclarationNode::ptr Parser::parseDeclaration()
 ast::AssignmentNode::ptr Parser::parseAssignment()
 {
     auto token = this->_tokenItr.get();
-     if (!token || !token->isType(Token::IDENTIFIER))
+    if (!token || !token->isType(Token::IDENTIFIER))
         return nullptr;
 
-     std::string identifier(token->getLexeme());
+    std::string identifier(token->getLexeme());
 
-     auto nextToken = this->_tokenItr.next();
-     if (!nextToken || !nextToken->isAssignableOperator())
-         return nullptr;
+    auto nextToken = this->_tokenItr.next();
+    if (!nextToken || !nextToken->isAssignableOperator())
+        return nullptr;
     this->_tokenItr.advance();
 
     token = this->_tokenItr.get();
@@ -245,7 +245,7 @@ ast::StatementNode::ptr Parser::parsePrint()
 
     token = this->_tokenItr.get();
     if (!token || !token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting \";\"", token ? *token : *this->_tokenItr.prev());
+        throw syntaxError("expecting 7\";\"", token ? *token : *this->_tokenItr.prev());
 
     this->_tokenItr.advance();
 
@@ -384,6 +384,8 @@ ast::StatementNode::ptr Parser::parseFunction()
         throw syntaxError("expecting '('", *identToken);
     this->_tokenItr.advance();
 
+    std::clog << "FUNCTION" << std::endl;
+
     std::map<std::string, Token::Type> params;
     auto typeIdent = this->parseTypeIdent();
 
@@ -392,6 +394,7 @@ ast::StatementNode::ptr Parser::parseFunction()
             if (params.find(typeIdent->first) != params.end())
                 throw syntaxError("parameter name already used", *this->_tokenItr.prev());
 
+            std::clog << "ident = " << typeIdent->first << std::endl;
             params.insert(*typeIdent);
 
             token = this->_tokenItr.get();
@@ -405,7 +408,7 @@ ast::StatementNode::ptr Parser::parseFunction()
 
     token = this->_tokenItr.get();
     if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("expecting ')'", *this->_tokenItr.prev());
+        throw syntaxError("dwqdwqdwqdwqexpecting ')'", *this->_tokenItr.prev());
     this->_tokenItr.advance();
 
     token = this->_tokenItr.get();
@@ -485,7 +488,7 @@ ast::ExpressionNode::ptr Parser::parseLogicalOr()
 {
     return this->parseBinaryExpression(
         {Token::OR},
-        [this]() {return this->parseLogicalAnd();},
+        [this]() { return this->parseLogicalAnd(); },
         true
     );
 }
@@ -494,7 +497,7 @@ ast::ExpressionNode::ptr Parser::parseLogicalAnd()
 {
     return this->parseBinaryExpression(
         {Token::AND},
-        [this]() {return this->parseBitwiseOr();},
+        [this]() { return this->parseBitwiseOr(); },
         true
     );
 }
@@ -503,7 +506,7 @@ ast::ExpressionNode::ptr Parser::parseBitwiseOr()
 {
     return this->parseBinaryExpression(
         {Token::BITWISE_OR},
-        [this](){return this->parseBitwiseXor();}
+        [this]() { return this->parseBitwiseXor(); }
     );
 }
 
@@ -511,7 +514,7 @@ ast::ExpressionNode::ptr Parser::parseBitwiseXor()
 {
     return this->parseBinaryExpression(
         {Token::BITWISE_XOR},
-        [this](){return this->parseBitwiseAnd();}
+        [this]() { return this->parseBitwiseAnd(); }
     );
 }
 
@@ -519,7 +522,7 @@ ast::ExpressionNode::ptr Parser::parseBitwiseAnd()
 {
     return this->parseBinaryExpression(
         {Token::BITWISE_AND},
-        [this](){return this->parseEquality();}
+        [this]() { return this->parseEquality(); }
     );
 }
 
@@ -527,7 +530,7 @@ ast::ExpressionNode::ptr Parser::parseEquality()
 {
     return this->parseBinaryExpression(
         {Token::EQUAL, Token::NOT_EQUAL},
-        [this]() {return this->parseComparison();}
+        [this]() { return this->parseComparison(); }
     );
 }
 
@@ -535,7 +538,7 @@ ast::ExpressionNode::ptr Parser::parseComparison()
 {
     return this->parseBinaryExpression(
         {Token::GT, Token::GTE, Token::LT, Token::LTE},
-        [this]() {return this->parseBitshift();}
+        [this]() { return this->parseBitshift(); }
     );
 }
 
@@ -543,7 +546,7 @@ ast::ExpressionNode::ptr Parser::parseBitshift()
 {
     return this->parseBinaryExpression(
         {Token::BITWISE_LSHIFT, Token::BITWISE_RSHIFT},
-        [this]() {return this->parseTerm();}
+        [this]() { return this->parseTerm(); }
     );
 }
 
@@ -551,7 +554,7 @@ ast::ExpressionNode::ptr Parser::parseTerm()
 {
     return this->parseBinaryExpression(
         {Token::PLUS, Token::MINUS},
-        [this]() {return this->parseFactor();}
+        [this]() { return this->parseFactor(); }
     );
 }
 
@@ -559,7 +562,7 @@ ast::ExpressionNode::ptr Parser::parseFactor()
 {
     return this->parseBinaryExpression(
         {Token::MULT, Token::MOD, Token::DIV},
-        [this]() {return this->parseUnary();}
+        [this]() { return this->parseUnary(); }
     );
 }
 
@@ -585,7 +588,7 @@ ast::ExpressionNode::ptr Parser::parseFunctionCall()
 {
     auto token = this->_tokenItr.get();
     if (!token)
-       return nullptr;
+        return nullptr;
 
     if (!token->isType(Token::IDENTIFIER))
         return this->parsePrimary();
@@ -619,6 +622,7 @@ ast::ExpressionNode::ptr Parser::parseFunctionCall()
     token = this->_tokenItr.get();
     if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
         throw syntaxError("expecting ')'", *this->_tokenItr.prev());
+    this->_tokenItr.advance();
 
     return ast::FunctionCallNode::create(ident, params);
 }
@@ -632,7 +636,7 @@ ast::ExpressionNode::ptr Parser::parsePrimary()
         &Parser::parseGrouping
     };
 
-    for (const auto &parse : primaryParsers) {
+    for (const auto &parse: primaryParsers) {
         const auto &expr = (this->*parse)();
         if (expr)
             return expr;

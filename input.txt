@@ -33,7 +33,7 @@ else if (i == 0)
 else
     print("i is smaller than 0");
 
-for (int i = 0; i < 5 && i <; i = i + 1)
+for (int i = 0; i < 5 && i < 10; i = i + 1)
     print(i);
 
 fnc print_str(s string) {

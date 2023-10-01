@@ -358,7 +358,7 @@ TEST(StatementTest, Functions)
                        "    fnc print_str(s string) {   "
                        "        print(s);               "
                        "    }                           "
-                       "    print_str(\"hello\")        "
+                       "    print_str(\"hello\");       "
                        "}                               ",
             .expectedOutput = "hello\n"
         },

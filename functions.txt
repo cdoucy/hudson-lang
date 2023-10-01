@@ -1,0 +1,9 @@
+fnc print_str(str s) {
+    print(s);
+}
+
+fnc div(int n, int m) int {
+    return n / m;
+}
+
+int r = div(4, 2);
