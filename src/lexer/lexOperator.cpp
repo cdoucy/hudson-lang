@@ -113,6 +113,9 @@ static const std::unordered_map<char, Tok> tokenTable{
                 {'|', Token::OR}
             }
         }
+    },
+    {
+        ',', {Token::COMMA, {}}
     }
 };
 

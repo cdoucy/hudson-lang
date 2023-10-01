@@ -260,3 +260,18 @@ void ast::EvalVisitor::visit(ast::IncrementNode &node)
 //            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
     }
 }
+
+void ast::EvalVisitor::visit(ast::FunctionNode &node)
+{
+
+}
+
+void ast::EvalVisitor::visit(ast::FunctionCallNode &node)
+{
+
+}
+
+void ast::EvalVisitor::visit(ast::ReturnNode &node)
+{
+
+}

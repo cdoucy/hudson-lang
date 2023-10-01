@@ -1,11 +1,12 @@
 
 ```
 program                 -> statement* EOF
-statement               -> expressionStatement | declarationStatement | assignmentStatement | incDecStatement | print | block | while | for | if
+statement               -> expressionStatement | declarationStatement | assignmentStatement | incDecStatement | returnStatement | print | block | while | for | if | function
 expressionStatement     -> expression ';'
 declarationStatement    -> declaration ';'
 assignementStatement    -> assignement ';'
 incDecStatement         -> incDec ';'
+returnStatement         -> return (expression)? ';'
 declaration             -> Type Identifier ('=' expression)?
 assignment              -> Identifier assimentOperator expression
 assignmentOperator      -> '=' | '+= | '+-' | '*=' | '%=' | '/='
@@ -17,6 +18,7 @@ for                     -> 'for' '(' (initStatement)? ';' expression ';' (stepSt
 initStatement           -> declaration | assignment
 stepStatement           -> assignement | incDec
 if                      -> 'if' '(' expression ')' statement ('else' statement)?
+function                -> 'fnc' Identifier FunctionSignature block
 expression              -> or
 or                      -> and (( '||' ) and ) *
 and                     -> bitwise_or (( '&&' ) bitwise_or ) *
@@ -28,12 +30,16 @@ comparison              -> bitshift (( '<' | '<=' | '>' | '>=' ) bitshift ) *
 bitshift                -> term (( '>>' | '<<' ) term ) *
 term                    -> factor ( ( '-' | '+' ) factor ) *
 factor                  -> unary ( ( '/' | '*' | '%' ) unary ) *
-unary                   -> ( '+' | '-' | '!' | '~' ) unary | primary
+unary                   -> ( '+' | '-' | '!' | '~' ) unary | call
+call                    -> Identifier '(' (expression ',')* (expression)? ')' | primary
 primary                 -> Integer | Identifier | String | grouping
 grouping                -> '(' expression ')'
 
 Integer                 -> ['0'-'9']+
-Type                    -> 'int' | 'str'
+Type                    -> 'int' | 'str' | 'fnc' FunctionSignature
+FunctionSignature       -> FunctionParams (Type)? block
+FunctionParams          -> '(' ( ( TypeIdent ',')* TypeIdent )?  ')'
+TypeIdent               -> Identifier Type
 Identifier              -> [a-zA-Z_][a-zA-Z_0-9]*
 String                  -> "*"
 ```

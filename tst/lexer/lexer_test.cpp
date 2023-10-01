@@ -235,6 +235,20 @@ TEST(LexerTest, KeyWords)
             .expected = {
                 Token{Token::ELSE, "else"}
             }
+        },
+        LexerTest{
+            .description = "5. fnc",
+            .expression = "fnc",
+            .expected = {
+                Token{Token::FNC, "fnc"}
+            }
+        },
+        LexerTest{
+            .description = "6. return",
+            .expression = "return",
+            .expected = {
+                Token{Token::RETURN, "return"}
+            }
         }
 
     };

@@ -20,6 +20,10 @@ namespace ast
     class ForNode;
     class IncrementNode;
 
+    class FunctionNode;
+    class FunctionCallNode;
+    class ReturnNode;
+
     class ProgramNode;
 
     class IVisitor
@@ -43,6 +47,10 @@ namespace ast
             virtual void visit(WhileNode &node) = 0;
             virtual void visit(ConditionNode &node) = 0;
             virtual void visit(ForNode &node) = 0;
+
+            virtual void visit(FunctionNode &node) = 0;
+            virtual void visit(FunctionCallNode &node) = 0;
+            virtual void visit(ReturnNode &node) = 0;
 
             virtual void visit(ProgramNode &node) = 0;
     };

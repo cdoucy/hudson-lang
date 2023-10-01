@@ -348,3 +348,31 @@ TEST(StatementTest, StatementOperator)
 
     testStatements(testCases);
 }
+
+TEST(StatementTest, Functions)
+{
+    const std::vector<StatementTest> testCases{
+        StatementTest{
+            .description = "1. print_str function",
+            .program = "{"
+                       "    fnc print_str(s string) {   "
+                       "        print(s);               "
+                       "    }                           "
+                       "    print_str(\"hello\")        "
+                       "}                               ",
+            .expectedOutput = "hello\n"
+        },
+        StatementTest{
+            .description = "2. add function",
+            .program = "{                               "
+                       "    fnc add(int n, int m) {     "
+                       "        return n + m;           "
+                       "    }                           "
+                       "    print(add(5, 3));           "
+                       "}                               ",
+            .expectedOutput = "8\n"
+        },
+    };
+
+    testStatements(testCases);
+}

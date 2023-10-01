@@ -35,3 +35,13 @@ else
 
 for (int i = 0; i < 5 && i <; i = i + 1)
     print(i);
+
+fnc print_str(s string) {
+    print(s);
+}
+
+fnc div(int n, int m) int {
+    return n / m;
+}
+
+int r = div(4, 2);

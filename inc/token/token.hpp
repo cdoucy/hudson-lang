@@ -32,18 +32,20 @@ class Token
             SEMICOLON,
             INCR, DECR,
             PLUS_GN, MINUS_GN, MULT_GN, DIV_GN, MOD_GN,
+            COMMA,
 
             // Literal types
-            INTEGER, STRING,
+            INTEGER, STRING, FNC_TYPE,
 
             // Keywords
-            INT_TYPE, STR_TYPE,
+            INT_TYPE, STR_TYPE, VOID_TYPE,
 
             PRINT,
 
             WHILE,
             IF, ELSE,
             FOR,
+            FNC, RETURN,
 
             // Identifier
             IDENTIFIER

@@ -36,10 +36,12 @@ ast::StatementNode::ptr Parser::parseStatement()
         &Parser::parseExpressionStatement,
         &Parser::parseDeclarationStatement,
         &Parser::parsePrint,
-        &Parser::parseBlock,
+        &Parser::parseBlockStatement,
         &Parser::parseWhile,
         &Parser::parseConditions,
-        &Parser::parseFor
+        &Parser::parseFor,
+        &Parser::parseReturnStatement,
+        &Parser::parseFunction
     };
 
     for (const auto &parse : statementsParser) {
@@ -121,6 +123,21 @@ ast::StatementNode::ptr Parser::parseIncrementStatement()
     return increment;
 }
 
+ast::StatementNode::ptr Parser::parseReturnStatement()
+{
+    auto stmt = this->parseReturn();
+    if (!stmt)
+        return nullptr;
+
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+
+    this->_tokenItr.advance();
+
+    return stmt;
+}
+
 ast::IncrementNode::ptr Parser::parseIncrement()
 {
     auto token = this->_tokenItr.get();
@@ -136,23 +153,25 @@ ast::IncrementNode::ptr Parser::parseIncrement()
     return ast::IncrementNode::create(token->getLexeme(), nextToken->getType());
 }
 
-ast::DeclarationNode::ptr Parser::parseDeclaration()
+ast::StatementNode::ptr Parser::parseReturn()
 {
     auto token = this->_tokenItr.get();
-    if (!token || (!token->isType(Token::INT_TYPE) && !token->isType(Token::STR_TYPE)))
+    if (!token || !token->isType(Token::RETURN))
+        return nullptr;
+    this->_tokenItr.advance();
+
+    auto expr = this->parseExpression();
+
+    return ast::ReturnNode::create(expr);
+}
+
+ast::DeclarationNode::ptr Parser::parseDeclaration()
+{
+    auto typeIdent = this->parseTypeIdent();
+    if (!typeIdent)
         return nullptr;
 
-    Token::Type declarationType = token->getType();
-    this->_tokenItr.advance();
-
-    token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::IDENTIFIER))
-        throw syntaxError("expecting identifier", *this->_tokenItr.prev());
-
-    std::string identifier(token->getLexeme());
-    this->_tokenItr.advance();
-
-    token = this->_tokenItr.get();
+    auto token = this->_tokenItr.get();
     ast::ExpressionNode::ptr expr;
 
     if (token && token->isType(Token::ASSIGN)) {
@@ -163,7 +182,7 @@ ast::DeclarationNode::ptr Parser::parseDeclaration()
             throw syntaxError("expecting expression", *token);
     }
 
-    return ast::DeclarationNode::create(declarationType, identifier, expr);
+    return ast::DeclarationNode::create(typeIdent->second, typeIdent->first, expr);
 }
 
 ast::AssignmentNode::ptr Parser::parseAssignment()
@@ -233,7 +252,12 @@ ast::StatementNode::ptr Parser::parsePrint()
     return ast::PrintNode::create(expr);
 }
 
-ast::StatementNode::ptr Parser::parseBlock()
+ast::StatementNode::ptr Parser::parseBlockStatement()
+{
+    return this->parseBlock();
+}
+
+ast::BlockNode::ptr Parser::parseBlock()
 {
     auto token = this->_tokenItr.get();
     if (!token || !token->isType(Token::OPEN_BRACKET))
@@ -342,6 +366,68 @@ ast::StatementNode::ptr Parser::parseFor()
 
     return ast::ForNode::create(expr, initStmt, stepStatement, stmt);
 }
+
+ast::StatementNode::ptr Parser::parseFunction()
+{
+    auto fncToken = this->_tokenItr.get();
+    if (!fncToken || !fncToken->isType(Token::FNC))
+        return nullptr;
+    this->_tokenItr.advance();
+
+    auto identToken = this->_tokenItr.get();
+    if (!identToken || !identToken->isType(Token::IDENTIFIER))
+        throw syntaxError("expecting identifier", *fncToken);
+    this->_tokenItr.advance();
+
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::OPEN_PARENTHESIS))
+        throw syntaxError("expecting '('", *identToken);
+    this->_tokenItr.advance();
+
+    std::map<std::string, Token::Type> params;
+    auto typeIdent = this->parseTypeIdent();
+
+    if (typeIdent) {
+        while (true) {
+            if (params.find(typeIdent->first) != params.end())
+                throw syntaxError("parameter name already used", *this->_tokenItr.prev());
+
+            params.insert(*typeIdent);
+
+            token = this->_tokenItr.get();
+            if (!token || !token->isType(Token::COMMA))
+                break;
+            this->_tokenItr.advance();
+
+            typeIdent = this->parseTypeIdent();
+        }
+    }
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("expecting ')'", *this->_tokenItr.prev());
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+    if (!token)
+        throw syntaxError("expecting return type or block", *this->_tokenItr.prev());
+
+    Token::Type returnType = Token::VOID_TYPE;
+    if (token->isType(Token::INT_TYPE) || token->isType(Token::STR_TYPE)) {
+        returnType = token->getType();
+        this->_tokenItr.advance();
+    }
+
+    auto block = this->parseBlock();
+
+    return ast::FunctionNode::create(
+        identToken->getLexeme(),
+        params,
+        returnType,
+        block
+    );
+}
+
 
 ast::InitStatementNode::ptr Parser::parseInitStatement()
 {
@@ -484,7 +570,7 @@ ast::ExpressionNode::ptr Parser::parseUnary()
         return nullptr;
 
     if (!token->isTypeAnyOf({Token::PLUS, Token::MINUS, Token::NOT, Token::BITWISE_NOT}))
-        return this->parsePrimary();
+        return this->parseFunctionCall();
 
     this->_tokenItr.advance();
 
@@ -493,6 +579,48 @@ ast::ExpressionNode::ptr Parser::parseUnary()
         throw syntaxError("expecting expression", *token);
 
     return ast::UnaryNode::create(token->getType(), expression);
+}
+
+ast::ExpressionNode::ptr Parser::parseFunctionCall()
+{
+    auto token = this->_tokenItr.get();
+    if (!token)
+       return nullptr;
+
+    if (!token->isType(Token::IDENTIFIER))
+        return this->parsePrimary();
+
+    std::string ident(token->getLexeme());
+
+    auto nextToken = this->_tokenItr.next();
+    if (!nextToken || !nextToken->isType(Token::OPEN_PARENTHESIS))
+        return this->parsePrimary();
+
+    this->_tokenItr.advance().advance();
+
+    auto expr = this->parseExpression();
+    std::vector<ast::ExpressionNode::ptr> params;
+
+    if (expr != nullptr) {
+        while (true) {
+            params.push_back(std::move(expr));
+
+            token = this->_tokenItr.get();
+            if (!token || !token->isType(Token::COMMA))
+                break;
+            this->_tokenItr.advance();
+
+            expr = this->parseExpression();
+            if (expr == nullptr)
+                throw syntaxError("expecting expression", *token);
+        }
+    }
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("expecting ')'", *this->_tokenItr.prev());
+
+    return ast::FunctionCallNode::create(ident, params);
 }
 
 ast::ExpressionNode::ptr Parser::parsePrimary()
@@ -639,4 +767,21 @@ ast::ExpressionNode::ptr Parser::parseParenthesizedExpression(const Token &prevT
     this->_tokenItr.advance();
 
     return expr;
+}
+
+std::optional<std::pair<std::string, Token::Type>> Parser::parseTypeIdent()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || (!token->isType(Token::INT_TYPE) && !token->isType(Token::STR_TYPE)))
+        return {};
+
+    Token::Type declarationType = token->getType();
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::IDENTIFIER))
+        throw syntaxError("expecting identifier", *this->_tokenItr.prev());
+    this->_tokenItr.advance();
+
+    return std::make_pair(token->getLexeme(), declarationType);
 }

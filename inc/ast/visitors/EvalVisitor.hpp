@@ -21,6 +21,10 @@
 #include "ForNode.hpp"
 #include "IncrementNode.hpp"
 
+#include "FunctionNode.hpp"
+#include "ReturnNode.hpp"
+#include "FunctionCallNode.hpp"
+
 #include "ProgramNode.hpp"
 
 #include "State.hpp"
@@ -50,6 +54,10 @@ namespace ast
             void visit(ConditionNode &node) final;
             void visit(ForNode &node) final;
             void visit(IncrementNode &node) final;
+
+            void visit(FunctionNode &node) final;
+            void visit(FunctionCallNode &node) final;
+            void visit(ReturnNode &node) final;
 
             void visit(ProgramNode &node) final;
 
