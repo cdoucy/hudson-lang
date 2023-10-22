@@ -7,27 +7,27 @@
 
 namespace ast
 {
-    class FunctionCallNode final : public ExpressionNode
+    class CallNode final : public ExpressionNode
     {
         public:
-        using ptr = std::shared_ptr<FunctionCallNode>;
+        using ptr = std::shared_ptr<CallNode>;
         static ptr create(
-            const std::string &identifier,
+            const ExpressionNode::ptr &callee,
             const std::vector<ast::ExpressionNode::ptr> &params
         );
-        explicit FunctionCallNode(
-            std::string identifier,
+        explicit CallNode(
+            ExpressionNode::ptr callee,
             const std::vector<ast::ExpressionNode::ptr> &params
         );
-        ~FunctionCallNode() final = default;
+        ~CallNode() final = default;
 
         void accept(IVisitor &visitor) final;
 
-        [[nodiscard]] const std::string &getIdentifier() const;
+        [[nodiscard]] const ExpressionNode::ptr &getCallee() const;
         [[nodiscard]] const std::vector<ast::ExpressionNode::ptr>  &getParams() const;
 
         private:
-        std::string _identifier;
+        ExpressionNode::ptr _callee;
         std::vector<ast::ExpressionNode::ptr> _params;
     };
 };

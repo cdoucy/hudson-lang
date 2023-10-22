@@ -23,7 +23,7 @@
 
 #include "FunctionNode.hpp"
 #include "ReturnNode.hpp"
-#include "FunctionCallNode.hpp"
+#include "CallNode.hpp"
 
 #include "ProgramNode.hpp"
 
@@ -56,15 +56,15 @@ namespace ast
             void visit(IncrementNode &node) final;
 
             void visit(FunctionNode &node) final;
-            void visit(FunctionCallNode &node) final;
+            void visit(CallNode &node) final;
             void visit(ReturnNode &node) final;
 
             void visit(ProgramNode &node) final;
 
-            const runtime::Object &value() const noexcept;
+            [[nodiscard]] const runtime::Object &value() const noexcept;
             [[nodiscard]] Token::Integer getResult() const;
 
-            const runtime::State &getState() const noexcept;
+            [[nodiscard]] const runtime::State &getState() const noexcept;
 
             void clearState() noexcept;
 

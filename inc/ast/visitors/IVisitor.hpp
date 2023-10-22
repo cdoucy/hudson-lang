@@ -21,7 +21,7 @@ namespace ast
     class IncrementNode;
 
     class FunctionNode;
-    class FunctionCallNode;
+    class CallNode;
     class ReturnNode;
 
     class ProgramNode;
@@ -49,7 +49,7 @@ namespace ast
             virtual void visit(ForNode &node) = 0;
 
             virtual void visit(FunctionNode &node) = 0;
-            virtual void visit(FunctionCallNode &node) = 0;
+            virtual void visit(CallNode &node) = 0;
             virtual void visit(ReturnNode &node) = 0;
 
             virtual void visit(ProgramNode &node) = 0;

@@ -251,22 +251,19 @@ void ast::EvalVisitor::visit(ast::IncrementNode &node)
     auto &object = this->_state->find(node.getIdentifier());
 
     switch (node.getOperator()) {
-        default:
-            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
         case Token::INCR: object.assign(object + 1); break;
         case Token::DECR: object.assign(object - 1); break;
 
-//        default:
-//            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
+        default:
+            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
     }
 }
 
 void ast::EvalVisitor::visit(ast::FunctionNode &node)
 {
-
 }
 
-void ast::EvalVisitor::visit(ast::FunctionCallNode &node)
+void ast::EvalVisitor::visit(ast::CallNode &node)
 {
 
 }

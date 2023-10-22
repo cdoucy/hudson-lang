@@ -379,39 +379,35 @@ ast::StatementNode::ptr Parser::parseFunction()
         throw syntaxError("expecting identifier", *fncToken);
     this->_tokenItr.advance();
 
-    auto token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::OPEN_PARENTHESIS))
+    auto open_p = this->_tokenItr.get();
+    if (!open_p || !open_p->isType(Token::OPEN_PARENTHESIS))
         throw syntaxError("expecting '('", *identToken);
     this->_tokenItr.advance();
-
-    std::clog << "FUNCTION" << std::endl;
 
     std::map<std::string, Token::Type> params;
     auto typeIdent = this->parseTypeIdent();
 
-    if (typeIdent) {
-        while (true) {
-            if (params.find(typeIdent->first) != params.end())
-                throw syntaxError("parameter name already used", *this->_tokenItr.prev());
+    while (typeIdent) {
 
-            std::clog << "ident = " << typeIdent->first << std::endl;
-            params.insert(*typeIdent);
+        if (params.find(typeIdent->first) != params.end())
+            throw syntaxError("parameter name already used", *this->_tokenItr.prev());
 
-            token = this->_tokenItr.get();
-            if (!token || !token->isType(Token::COMMA))
-                break;
-            this->_tokenItr.advance();
+        params.insert(*typeIdent);
 
-            typeIdent = this->parseTypeIdent();
-        }
+        auto token = this->_tokenItr.get();
+        if (!token || !token->isType(Token::COMMA))
+            break;
+        this->_tokenItr.advance();
+
+        typeIdent = this->parseTypeIdent();
     }
 
-    token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("dwqdwqdwqdwqexpecting ')'", *this->_tokenItr.prev());
+    auto close_p = this->_tokenItr.get();
+    if (!close_p || !close_p->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("unmatched '('", *open_p);
     this->_tokenItr.advance();
 
-    token = this->_tokenItr.get();
+   auto token = this->_tokenItr.get();
     if (!token)
         throw syntaxError("expecting return type or block", *this->_tokenItr.prev());
 
@@ -422,6 +418,8 @@ ast::StatementNode::ptr Parser::parseFunction()
     }
 
     auto block = this->parseBlock();
+    if (block == nullptr)
+        throw syntaxError("expecting function body", *identToken);
 
     return ast::FunctionNode::create(
         identToken->getLexeme(),
@@ -573,7 +571,7 @@ ast::ExpressionNode::ptr Parser::parseUnary()
         return nullptr;
 
     if (!token->isTypeAnyOf({Token::PLUS, Token::MINUS, Token::NOT, Token::BITWISE_NOT}))
-        return this->parseFunctionCall();
+        return this->parseCall();
 
     this->_tokenItr.advance();
 
@@ -584,47 +582,49 @@ ast::ExpressionNode::ptr Parser::parseUnary()
     return ast::UnaryNode::create(token->getType(), expression);
 }
 
-ast::ExpressionNode::ptr Parser::parseFunctionCall()
+ast::ExpressionNode::ptr Parser::parseCall()
 {
-    auto token = this->_tokenItr.get();
-    if (!token)
-        return nullptr;
+    auto expr = this->parsePrimary();
+    ast::ExpressionNode::ptr ret;
 
-    if (!token->isType(Token::IDENTIFIER))
-        return this->parsePrimary();
+    auto open_p = this->_tokenItr.get();
+    while (open_p && open_p->isType(Token::OPEN_PARENTHESIS)) {
+        this->_tokenItr.advance();
 
-    std::string ident(token->getLexeme());
+        auto params = this->parseParams();
 
-    auto nextToken = this->_tokenItr.next();
-    if (!nextToken || !nextToken->isType(Token::OPEN_PARENTHESIS))
-        return this->parsePrimary();
+        auto close_p = this->_tokenItr.get();
+        if (!close_p || !close_p->isType(Token::CLOSE_PARENTHESIS))
+            throw syntaxError("unmatched parenthesis", *open_p);
+        this->_tokenItr.advance();
 
-    this->_tokenItr.advance().advance();
-
-    auto expr = this->parseExpression();
-    std::vector<ast::ExpressionNode::ptr> params;
-
-    if (expr != nullptr) {
-        while (true) {
-            params.push_back(std::move(expr));
-
-            token = this->_tokenItr.get();
-            if (!token || !token->isType(Token::COMMA))
-                break;
-            this->_tokenItr.advance();
-
-            expr = this->parseExpression();
-            if (expr == nullptr)
-                throw syntaxError("expecting expression", *token);
-        }
+        expr = ast::CallNode::create(expr, params);
+        open_p = this->_tokenItr.get();
     }
 
-    token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::CLOSE_PARENTHESIS))
-        throw syntaxError("expecting ')'", *this->_tokenItr.prev());
-    this->_tokenItr.advance();
+    return expr;
+}
 
-    return ast::FunctionCallNode::create(ident, params);
+std::vector<ast::ExpressionNode::ptr> Parser::parseParams()
+{
+    auto expr = this->parseExpression();
+    if (!expr)
+        return {};
+
+    std::vector<ast::ExpressionNode::ptr> params = {expr};
+
+    auto comma = this->_tokenItr.get();
+    while (comma && comma->isType(Token::COMMA)) {
+        this->_tokenItr.advance();
+        expr = this->parseExpression();
+        if (!expr)
+            throw syntaxError("expecting expression after ','", *comma);
+
+        params.push_back(expr);
+        comma = this->_tokenItr.get();
+    }
+
+    return params;
 }
 
 ast::ExpressionNode::ptr Parser::parsePrimary()

@@ -37,7 +37,7 @@ set(SOURCES
     ${PROJECT_ROOT}/src/ast/nodes/ForNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/IncrementNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/FunctionNode.cpp
-    ${PROJECT_ROOT}/src/ast/nodes/FunctionCallNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/CallNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/ReturnNode.cpp
 
     ${PROJECT_ROOT}/src/ast/visitors/EvalVisitor.cpp

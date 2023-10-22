@@ -53,7 +53,8 @@ class Parser
         ast::ExpressionNode::ptr parseTerm();
         ast::ExpressionNode::ptr parseFactor();
         ast::ExpressionNode::ptr parseUnary();
-        ast::ExpressionNode::ptr parseFunctionCall();
+        ast::ExpressionNode::ptr parseCall();
+        std::vector<ast::ExpressionNode::ptr> parseParams();
         ast::ExpressionNode::ptr parsePrimary();
         ast::ExpressionNode::ptr parseInteger();
         ast::ExpressionNode::ptr parseString();
