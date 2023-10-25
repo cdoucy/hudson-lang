@@ -35,10 +35,10 @@ class Token
             COMMA,
 
             // Literal types
-            INTEGER, STRING, FNC_TYPE,
+            INTEGER, STRING,
 
             // Keywords
-            INT_TYPE, STR_TYPE, VOID_TYPE,
+            INT_TYPE, STR_TYPE, VOID_TYPE, FNC_TYPE,
 
             PRINT,
 

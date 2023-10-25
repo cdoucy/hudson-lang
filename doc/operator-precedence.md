@@ -33,14 +33,15 @@ factor                  -> unary ( ( '/' | '*' | '%' ) unary ) *
 unary                   -> ( '+' | '-' | '!' | '~' ) unary | call
 call                    -> primary ( '(' params? ')' )*
 params                  -> expression ( ',' expression )*
-primary                 -> Integer | Identifier | String | grouping
+primary                 -> Integer | Identifier | String | AnonymousFunction | grouping
 grouping                -> '(' expression ')'
 
 Integer                 -> ['0'-'9']+
+Identifier              -> [a-zA-Z_][a-zA-Z_0-9]*
+String                  -> "*"
+AnonymousFunction       -> 'fnc' FunctionSignature block
 Type                    -> 'int' | 'str' | 'fnc' FunctionSignature
 FunctionSignature       -> FunctionParams (Type)?
 FunctionParams          -> '(' ( TypeIdent ( ',' TypeIdent)* )?  ')'
 TypeIdent               -> Identifier Type
-Identifier              -> [a-zA-Z_][a-zA-Z_0-9]*
-String                  -> "*"
 ```

@@ -1,6 +1,7 @@
 #include <unordered_map>
 
 #include "EvalVisitor.hpp"
+#include "Return.hpp"
 
 #define OPERATOR_FUNCTION(type, op) {type, [](const auto &l, const auto &r){return l op r;}}
 
@@ -261,14 +262,62 @@ void ast::EvalVisitor::visit(ast::IncrementNode &node)
 
 void ast::EvalVisitor::visit(ast::FunctionNode &node)
 {
+    runtime::Object object(node);
+
+    this->_state->set(node.getIdentifier(), object);
 }
 
 void ast::EvalVisitor::visit(ast::CallNode &node)
 {
+    auto &callee = this->evaluate(node.getCallee());
 
+    if (callee.getType() != Token::FNC_TYPE)
+        throw LogicalError("object is not callable");
+
+    auto function = callee.get<FunctionNode>();
+
+    auto params = node.getParams();
+    auto namedParams = function.getParams();
+
+    if (params.size() != namedParams.size())
+        throw LogicalError("number of arguments mismatch");
+
+    auto state = runtime::State::create();
+
+    for (std::size_t i = 0; i < params.size(); i++) {
+        auto evaluatedParam = this->evaluate(params[i]);
+        auto namedParam = namedParams[i];
+
+        if (evaluatedParam.getType() != namedParam.type)
+            throw LogicalError(fmt::format(
+                "invalid type in function call : {} is of type {} but expected type {}",
+                namedParam.name,
+                Token::typeToString(evaluatedParam.getType()),
+                Token::typeToString(namedParam.type)
+            ));
+
+        state->set(namedParam.name, evaluatedParam);
+    }
+
+    auto originalState = std::move(this->_state);
+    this->_state = state;
+
+    try {
+        function.getBlock()->accept(*this);
+    } catch (const runtime::Return &ret) {
+        if (ret.hasValue())
+            this->_expressionResult = ret.getObject();
+    }
+
+    this->_state = std::move(originalState);
 }
 
 void ast::EvalVisitor::visit(ast::ReturnNode &node)
 {
+    std::optional<runtime::Object> returnedObject;
 
+    if (node.getExpression())
+        returnedObject = this->evaluate(node.getExpression());
+
+    throw runtime::Return(returnedObject);
 }

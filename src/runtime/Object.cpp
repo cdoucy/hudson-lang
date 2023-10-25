@@ -3,6 +3,13 @@
 
 #include "Object.hpp"
 
+runtime::Object::Object()
+    :   _identifier(),
+        _type(Token::Type(-1)),
+        _raw()
+{
+}
+
 runtime::Object::Object(Token::Type type, std::string identifier)
     :   _identifier(std::move(identifier)),
         _type(type)
@@ -28,6 +35,12 @@ runtime::Object::Object(Token::String s, std::string identifier)
 {
 }
 
+runtime::Object::Object(const ast::FunctionNode &function)
+:   _identifier(function.getIdentifier()),
+    _type(Token::FNC_TYPE),
+    _raw(function)
+{}
+
 const std::string &runtime::Object::getIdentifier() const
 {
     return this->_identifier;
@@ -44,13 +57,6 @@ Token::Integer runtime::Object::getInteger() const
         throw InternalError("token type is not integer");
 
     return std::any_cast<Token::Integer>(this->_raw);
-}
-
-runtime::Object::Object()
-:   _identifier(),
-    _type(Token::Type(-1)),
-    _raw()
-{
 }
 
 std::string runtime::Object::string() const noexcept

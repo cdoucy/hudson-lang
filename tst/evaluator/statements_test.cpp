@@ -354,12 +354,12 @@ TEST(StatementTest, Functions)
     const std::vector<StatementTest> testCases{
         StatementTest{
             .description = "1. print_str function",
-            .program = "{"
-                       "    fnc print_str(s string) {   "
-                       "        print(s);               "
-                       "    }                           "
-                       "    print_str(\"hello\");       "
-                       "}                               ",
+            .program = "{                               \n"
+                       "    fnc print_str(str s) {      \n"
+                       "        print(s);               \n"
+                       "    }                           \n"
+                       "    print_str(\"hello\");       \n"
+                       "}                               \n",
             .expectedOutput = "hello\n"
         },
         StatementTest{
@@ -371,6 +371,30 @@ TEST(StatementTest, Functions)
                        "    print(add(5, 3));           "
                        "}                               ",
             .expectedOutput = "8\n"
+        },
+        StatementTest{
+            .description = "3. Declared function scope should not have access to outer variables",
+            .program = "{                   "
+                       "    int n = 0;      "
+                       "    fnc f() {       "
+                       "        print(n);   "
+                       "    }               "
+                       "    f();            "
+                       "}                   ",
+            .shouldThrow = true
+        },
+        StatementTest{
+            .description = "4. Calling a function from a function",
+            .program = "{                           "
+                       "    fnc fa() {              "
+                       "        print(\"hello\");   "
+                       "    }                       "
+                       "    fnc fb() {              "
+                       "        fa();               "
+                       "    }                       "
+                       "    fb();                   "
+                       "}                           ",
+            .expectedOutput = "hello\n"
         },
     };
 

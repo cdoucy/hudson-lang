@@ -384,15 +384,20 @@ ast::StatementNode::ptr Parser::parseFunction()
         throw syntaxError("expecting '('", *identToken);
     this->_tokenItr.advance();
 
-    std::map<std::string, Token::Type> params;
+    std::map<std::string, bool> paramsMap;
+    std::vector<ast::FunctionNode::Param> params;
     auto typeIdent = this->parseTypeIdent();
 
     while (typeIdent) {
 
-        if (params.find(typeIdent->first) != params.end())
+        if (paramsMap.find(typeIdent->first) != paramsMap.end())
             throw syntaxError("parameter name already used", *this->_tokenItr.prev());
 
-        params.insert(*typeIdent);
+        paramsMap.insert({typeIdent->first, true});
+        params.push_back(ast::FunctionNode::Param{
+           .name = typeIdent->first,
+           .type = typeIdent->second
+        });
 
         auto token = this->_tokenItr.get();
         if (!token || !token->isType(Token::COMMA))

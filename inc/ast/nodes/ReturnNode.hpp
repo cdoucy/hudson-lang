@@ -23,5 +23,6 @@ namespace ast
 
         private:
             ExpressionNode::ptr _expr;
+
     };
 };

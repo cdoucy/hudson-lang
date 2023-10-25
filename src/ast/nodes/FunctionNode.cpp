@@ -4,7 +4,7 @@
 
 ast::FunctionNode::ptr ast::FunctionNode::create(
     const std::string &identifier,
-    const std::map<std::string, Token::Type> &params,
+    const std::vector<Param> &params,
     Token::Type returnType,
     const ast::BlockNode::ptr &block
 )
@@ -14,7 +14,7 @@ ast::FunctionNode::ptr ast::FunctionNode::create(
 
 ast::FunctionNode::FunctionNode(
     std::string identifier,
-    const std::map<std::string, Token::Type> &params,
+    const std::vector<Param> &params,
     Token::Type returnType,
     ast::BlockNode::ptr block
 ):  _identifier(std::move(identifier)),
@@ -39,7 +39,7 @@ const std::string &ast::FunctionNode::getIdentifier() const
     return this->_identifier;
 }
 
-const std::map<std::string, Token::Type> &ast::FunctionNode::getParams() const
+const std::vector<ast::FunctionNode::Param> &ast::FunctionNode::getParams() const
 {
     return this->_params;
 }
