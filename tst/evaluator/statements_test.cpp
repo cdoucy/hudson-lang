@@ -3,7 +3,8 @@
 
 #include "Evaluator.hpp"
 
-struct StatementTest{
+struct StatementTest
+{
     std::string description;
     std::string program;
     std::string expectedOutput;
@@ -12,7 +13,7 @@ struct StatementTest{
 
 void testStatements(const std::vector<StatementTest> &testCases)
 {
-    for (const auto &tc : testCases) {
+    for (const auto &tc: testCases) {
         std::cout << tc.description << std::endl;
 
         std::ostringstream out;
@@ -31,7 +32,7 @@ void testStatements(const std::vector<StatementTest> &testCases)
 
 TEST(StatementTest, Blocks)
 {
-    const std::vector<StatementTest> testCases {
+    const std::vector<StatementTest> testCases{
         StatementTest{
             .description = "1. No block",
             .program = "int n = 1; print(n);",
@@ -394,6 +395,16 @@ TEST(StatementTest, Functions)
                        "    }                       "
                        "    fb();                   "
                        "}                           ",
+            .expectedOutput = "hello\n"
+        },
+        StatementTest{
+            .description = "5. Function without parameter",
+            .program = "{                           \n"
+                       "    fnc fa() {              \n"
+                       "        print(\"hello\");   \n"
+                       "    }                       \n"
+                       "    fa();                   \n"
+                       "}                           \n",
             .expectedOutput = "hello\n"
         },
     };

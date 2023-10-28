@@ -6,4 +6,17 @@ fnc div(int n, int m) int {
     return n / m;
 }
 
+fnc rec(int start) int {
+    if (start <= 0) {
+        return start;
+    }
+
+    print(start);
+
+    return rec(start - 1);
+}
+
 int r = div(4, 2);
+print(r);
+
+rec(10);

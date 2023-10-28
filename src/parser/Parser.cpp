@@ -245,7 +245,7 @@ ast::StatementNode::ptr Parser::parsePrint()
 
     token = this->_tokenItr.get();
     if (!token || !token->isType(Token::SEMICOLON))
-        throw syntaxError("expecting 7\";\"", token ? *token : *this->_tokenItr.prev());
+        throw syntaxError("expecting \";\"", token ? *token : *this->_tokenItr.prev());
 
     this->_tokenItr.advance();
 
@@ -395,8 +395,8 @@ ast::StatementNode::ptr Parser::parseFunction()
 
         paramsMap.insert({typeIdent->first, true});
         params.push_back(ast::FunctionNode::Param{
-           .name = typeIdent->first,
-           .type = typeIdent->second
+            .name = typeIdent->first,
+            .type = typeIdent->second
         });
 
         auto token = this->_tokenItr.get();
@@ -412,7 +412,7 @@ ast::StatementNode::ptr Parser::parseFunction()
         throw syntaxError("unmatched '('", *open_p);
     this->_tokenItr.advance();
 
-   auto token = this->_tokenItr.get();
+    auto token = this->_tokenItr.get();
     if (!token)
         throw syntaxError("expecting return type or block", *this->_tokenItr.prev());
 
@@ -596,13 +596,21 @@ ast::ExpressionNode::ptr Parser::parseCall()
     while (open_p && open_p->isType(Token::OPEN_PARENTHESIS)) {
         this->_tokenItr.advance();
 
-        auto params = this->parseParams();
+        auto token = this->_tokenItr.get();
+        if (!token)
+            throw syntaxError("expecting argument or \")\"", *open_p);
 
-        auto close_p = this->_tokenItr.get();
-        if (!close_p || !close_p->isType(Token::CLOSE_PARENTHESIS))
-            throw syntaxError("unmatched parenthesis", *open_p);
+        std::vector<ast::ExpressionNode::ptr> params;
+
+        // Handle function call without arguments, eg f()
+        if (!token->isType(Token::CLOSE_PARENTHESIS)) {
+            params = this->parseParams();
+            auto close_p = this->_tokenItr.get();
+            if (!close_p || !close_p->isType(Token::CLOSE_PARENTHESIS))
+                throw syntaxError("unmatched parenthesis", *open_p);
+        }
+
         this->_tokenItr.advance();
-
         expr = ast::CallNode::create(expr, params);
         open_p = this->_tokenItr.get();
     }
