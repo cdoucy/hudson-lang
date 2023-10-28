@@ -97,7 +97,7 @@ void ast::EvalVisitor::visit(ast::LogicalNode &node)
 
 void ast::EvalVisitor::visit(ast::IdentifierNode &node)
 {
-    this->_expressionResult = this->_state->find(node.getIdentifier());
+    this->_expressionResult = this->_localState->find(node.getIdentifier());
 }
 
 Token::Integer ast::EvalVisitor::getResult() const
@@ -118,12 +118,12 @@ void ast::EvalVisitor::visit(ast::DeclarationNode &node)
     if (expression)
         object.assign(this->evaluate(expression));
 
-    this->_state->set(node.getIdentifier(), object);
+    this->_localState->set(node.getIdentifier(), object);
 }
 
 void ast::EvalVisitor::visit(ast::AssignmentNode &node)
 {
-    auto &object = this->_state->find(node.getIdentifier());
+    auto &object = this->_localState->find(node.getIdentifier());
     auto value = this->evaluate(node.getExpression());
 
     switch (node.getOperator()) {
@@ -152,13 +152,13 @@ void ast::EvalVisitor::visit(ast::PrintNode &node)
 
 void ast::EvalVisitor::visit(ast::BlockNode &node)
 {
-    this->_state = runtime::State::create(this->_state);
+    this->_localState = runtime::State::create(this->_localState);
 
     for (const auto &stmt : node.getStatements()) {
         stmt->accept(*this);
     }
 
-    this->_state = this->_state->restoreParent();
+    this->_localState = this->_localState->restoreParent();
 }
 
 void ast::EvalVisitor::visit(ast::ProgramNode &program)
@@ -179,7 +179,7 @@ const runtime::Object &ast::EvalVisitor::evaluate(const ast::ExpressionNode::ptr
 
 const runtime::State &ast::EvalVisitor::getState() const noexcept
 {
-    return *this->_state;
+    return *this->_localState;
 }
 
 const runtime::Object &ast::EvalVisitor::value() const noexcept
@@ -189,13 +189,14 @@ const runtime::Object &ast::EvalVisitor::value() const noexcept
 
 void ast::EvalVisitor::clearState() noexcept
 {
-    this->_state->clear();
+    this->_localState->clear();
 }
 
 ast::EvalVisitor::EvalVisitor(std::ostream &output)
-:   _output(output),
-    _expressionResult(),
-    _state(runtime::State::create())
+: _output(output),
+  _expressionResult(),
+  _globalState(runtime::State::create()),
+  _localState(runtime::State::create(this->_globalState))
 {}
 
 void ast::EvalVisitor::visit(ast::WhileNode &node)
@@ -231,7 +232,7 @@ void ast::EvalVisitor::visit(ast::ForNode &node)
     const auto &step = node.getStepStatement();
 
     if (init) {
-        this->_state = runtime::State::create(this->_state);
+        this->_localState = runtime::State::create(this->_localState);
         init->accept(*this);
     }
 
@@ -244,12 +245,12 @@ void ast::EvalVisitor::visit(ast::ForNode &node)
     }
 
     if (init)
-        this->_state = this->_state->restoreParent();
+        this->_localState = this->_localState->restoreParent();
 }
 
 void ast::EvalVisitor::visit(ast::IncrementNode &node)
 {
-    auto &object = this->_state->find(node.getIdentifier());
+    auto &object = this->_localState->find(node.getIdentifier());
 
     switch (node.getOperator()) {
         case Token::INCR: object.assign(object + 1); break;
@@ -264,7 +265,8 @@ void ast::EvalVisitor::visit(ast::FunctionNode &node)
 {
     runtime::Object object(node);
 
-    this->_state->set(node.getIdentifier(), object);
+    // Add function object to global state, so it can be called from anywhere, including functions
+    this->_globalState->set(node.getIdentifier(), object);
 }
 
 void ast::EvalVisitor::visit(ast::CallNode &node)
@@ -282,7 +284,10 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
     if (params.size() != namedParams.size())
         throw LogicalError("number of arguments mismatch");
 
-    auto state = runtime::State::create();
+    // Create a new state for the function.
+    // function's state takes global state as parent state, so declared functions can be called from the current function
+    // but variables of the current state cannot be references from current function.
+    auto state = runtime::State::create(this->_globalState);
 
     for (std::size_t i = 0; i < params.size(); i++) {
         auto evaluatedParam = this->evaluate(params[i]);
@@ -299,8 +304,8 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
         state->set(namedParam.name, evaluatedParam);
     }
 
-    auto originalState = std::move(this->_state);
-    this->_state = state;
+    auto originalState = std::move(this->_localState);
+    this->_localState = state;
 
     try {
         function.getBlock()->accept(*this);
@@ -309,7 +314,7 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
             this->_expressionResult = ret.getObject();
     }
 
-    this->_state = std::move(originalState);
+    this->_localState = std::move(originalState);
 }
 
 void ast::EvalVisitor::visit(ast::ReturnNode &node)
