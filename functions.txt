@@ -1,0 +1,34 @@
+fnc print_str(str s) {
+    print(s);
+}
+
+fnc div(int n, int m) int {
+    return n / m;
+}
+
+fnc rec(int start) int {
+    if (start <= 0) {
+        return start;
+    }
+
+    print(start);
+
+    return rec(start - 1);
+}
+
+int r = div(4, 2);
+print(r);
+
+fnc power(int x, int n) int {
+    if (n == 0) {
+        return 1;
+    }
+    if (n == 1) {
+        return x;
+    }
+    return power(x, n - 1) * x;
+}
+
+print(power(2, 32));
+
+rec(power(2, 8));

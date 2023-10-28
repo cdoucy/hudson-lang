@@ -27,13 +27,17 @@ class Parser
         ast::StatementNode::ptr parseDeclarationStatement();
         ast::StatementNode::ptr parseAssignmentStatement();
         ast::StatementNode::ptr parseIncrementStatement();
+        ast::StatementNode::ptr parseReturnStatement();
         ast::DeclarationNode::ptr parseDeclaration();
         ast::AssignmentNode::ptr parseAssignment();
         ast::IncrementNode::ptr parseIncrement();
+        ast::StatementNode::ptr parseReturn();
         ast::StatementNode::ptr parsePrint();
-        ast::StatementNode::ptr parseBlock();
+        ast::StatementNode::ptr parseBlockStatement();
+        ast::BlockNode::ptr parseBlock();
         ast::StatementNode::ptr parseWhile();
         ast::StatementNode::ptr parseFor();
+        ast::StatementNode::ptr parseFunction();
         ast::InitStatementNode::ptr parseInitStatement();
         ast::StepStatementNode::ptr parseStepStatement();
         ast::StatementNode::ptr parseConditions();
@@ -49,6 +53,8 @@ class Parser
         ast::ExpressionNode::ptr parseTerm();
         ast::ExpressionNode::ptr parseFactor();
         ast::ExpressionNode::ptr parseUnary();
+        ast::ExpressionNode::ptr parseCall();
+        std::vector<ast::ExpressionNode::ptr> parseParams();
         ast::ExpressionNode::ptr parsePrimary();
         ast::ExpressionNode::ptr parseInteger();
         ast::ExpressionNode::ptr parseString();
@@ -64,6 +70,8 @@ class Parser
         );
 
         ast::ExpressionNode::ptr parseParenthesizedExpression(const Token &previousToken);
+
+        std::optional<std::pair<std::string, Token::Type>> parseTypeIdent();
 
         static SyntaxError syntaxError(const std::string &errorMessage, const Token &token);
 };

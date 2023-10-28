@@ -1,6 +1,7 @@
 #include <unordered_map>
 
 #include "EvalVisitor.hpp"
+#include "Return.hpp"
 
 #define OPERATOR_FUNCTION(type, op) {type, [](const auto &l, const auto &r){return l op r;}}
 
@@ -96,7 +97,7 @@ void ast::EvalVisitor::visit(ast::LogicalNode &node)
 
 void ast::EvalVisitor::visit(ast::IdentifierNode &node)
 {
-    this->_expressionResult = this->_state->find(node.getIdentifier());
+    this->_expressionResult = this->_localState->find(node.getIdentifier());
 }
 
 Token::Integer ast::EvalVisitor::getResult() const
@@ -117,12 +118,12 @@ void ast::EvalVisitor::visit(ast::DeclarationNode &node)
     if (expression)
         object.assign(this->evaluate(expression));
 
-    this->_state->set(node.getIdentifier(), object);
+    this->_localState->set(node.getIdentifier(), object);
 }
 
 void ast::EvalVisitor::visit(ast::AssignmentNode &node)
 {
-    auto &object = this->_state->find(node.getIdentifier());
+    auto &object = this->_localState->find(node.getIdentifier());
     auto value = this->evaluate(node.getExpression());
 
     switch (node.getOperator()) {
@@ -151,13 +152,13 @@ void ast::EvalVisitor::visit(ast::PrintNode &node)
 
 void ast::EvalVisitor::visit(ast::BlockNode &node)
 {
-    this->_state = runtime::State::create(this->_state);
+    this->_localState = runtime::State::create(this->_localState);
 
     for (const auto &stmt : node.getStatements()) {
         stmt->accept(*this);
     }
 
-    this->_state = this->_state->restoreParent();
+    this->_localState = this->_localState->restoreParent();
 }
 
 void ast::EvalVisitor::visit(ast::ProgramNode &program)
@@ -178,7 +179,7 @@ const runtime::Object &ast::EvalVisitor::evaluate(const ast::ExpressionNode::ptr
 
 const runtime::State &ast::EvalVisitor::getState() const noexcept
 {
-    return *this->_state;
+    return *this->_localState;
 }
 
 const runtime::Object &ast::EvalVisitor::value() const noexcept
@@ -188,13 +189,14 @@ const runtime::Object &ast::EvalVisitor::value() const noexcept
 
 void ast::EvalVisitor::clearState() noexcept
 {
-    this->_state->clear();
+    this->_localState->clear();
 }
 
 ast::EvalVisitor::EvalVisitor(std::ostream &output)
-:   _output(output),
-    _expressionResult(),
-    _state(runtime::State::create())
+: _output(output),
+  _expressionResult(),
+  _globalState(runtime::State::create()),
+  _localState(runtime::State::create(this->_globalState))
 {}
 
 void ast::EvalVisitor::visit(ast::WhileNode &node)
@@ -230,7 +232,7 @@ void ast::EvalVisitor::visit(ast::ForNode &node)
     const auto &step = node.getStepStatement();
 
     if (init) {
-        this->_state = runtime::State::create(this->_state);
+        this->_localState = runtime::State::create(this->_localState);
         init->accept(*this);
     }
 
@@ -243,20 +245,117 @@ void ast::EvalVisitor::visit(ast::ForNode &node)
     }
 
     if (init)
-        this->_state = this->_state->restoreParent();
+        this->_localState = this->_localState->restoreParent();
 }
 
 void ast::EvalVisitor::visit(ast::IncrementNode &node)
 {
-    auto &object = this->_state->find(node.getIdentifier());
+    auto &object = this->_localState->find(node.getIdentifier());
 
     switch (node.getOperator()) {
-        default:
-            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
         case Token::INCR: object.assign(object + 1); break;
         case Token::DECR: object.assign(object - 1); break;
 
-//        default:
-//            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
+        default:
+            throw InternalError("EvalVisitor : invalid operator in IncrementNode");
     }
+}
+
+void ast::EvalVisitor::visit(ast::FunctionNode &node)
+{
+    runtime::Object object(node);
+
+    // Add function object to global state, so it can be called from anywhere, including functions
+    this->_globalState->set(node.getIdentifier(), object);
+}
+
+void ast::EvalVisitor::visit(ast::CallNode &node)
+{
+    auto &callee = this->evaluate(node.getCallee());
+
+    if (callee.getType() != Token::FNC_TYPE)
+        throw LogicalError("object is not callable");
+
+    auto function = callee.get<FunctionNode>();
+
+    auto params = node.getParams();
+    auto namedParams = function.getParams();
+
+    if (params.size() != namedParams.size())
+        throw LogicalError("number of arguments mismatch");
+
+    // Create a new state for the function.
+    // function's state takes global state as parent state, so declared functions can be called from the current function
+    // but variables of the current state cannot be references from current function.
+    auto state = runtime::State::create(this->_globalState);
+
+    for (std::size_t i = 0; i < params.size(); i++) {
+        auto evaluatedParam = this->evaluate(params[i]);
+        auto namedParam = namedParams[i];
+
+        if (evaluatedParam.getType() != namedParam.type)
+            throw invalidArgType(namedParam.name, evaluatedParam.getType(), namedParam.type);
+
+        state->set(namedParam.name, evaluatedParam);
+    }
+
+    auto originalState = std::move(this->_localState);
+    this->_localState = state;
+    bool hasReturned = false;
+
+    try {
+        function.getBlock()->accept(*this);
+    } catch (const runtime::Return &ret) {
+        hasReturned = true;
+        if (ret.hasValue()) {
+            const auto& obj = ret.getObject();
+
+            if (obj.getType() != function.getReturnType())
+                throw invalidReturnType(obj.getType(), function.getReturnType());
+
+            this->_expressionResult = obj;
+
+        } else if (function.getReturnType() != Token::VOID_TYPE)
+            throw invalidReturnType(Token::Type::VOID_TYPE, function.getReturnType());
+    }
+
+    if (!hasReturned && function.getReturnType() != Token::VOID_TYPE)
+        throw missingReturn(function.getReturnType());
+
+    this->_localState = std::move(originalState);
+}
+
+void ast::EvalVisitor::visit(ast::ReturnNode &node)
+{
+    std::optional<runtime::Object> returnedObject;
+
+    if (node.getExpression())
+        returnedObject = this->evaluate(node.getExpression());
+
+    throw runtime::Return(returnedObject);
+}
+
+LogicalError ast::EvalVisitor::invalidArgType(std::string paramName, Token::Type actualType, Token::Type expectedType) {
+    return LogicalError(fmt::format(
+        "invalid type in call : {} is of type {} but expected type {}",
+        paramName,
+        Token::typeToString(actualType),
+        Token::typeToString(expectedType)
+    ));
+}
+
+LogicalError ast::EvalVisitor::invalidReturnType(Token::Type actualType, Token::Type expectedType) {
+    return LogicalError(fmt::format(
+        "invalid return type in call : returned object is of type {}, but expected return type is {}",
+        Token::typeToString(actualType),
+        Token::typeToString(expectedType)
+    ));
+}
+
+LogicalError ast::EvalVisitor::missingReturn(Token::Type actualType)
+{
+    return LogicalError(fmt::format(
+        "return statement is missing in call that should have been return an object of type {}",
+        Token::typeToString(actualType)
+    ));
 }

@@ -3,7 +3,8 @@
 
 #include "Evaluator.hpp"
 
-struct StatementTest{
+struct StatementTest
+{
     std::string description;
     std::string program;
     std::string expectedOutput;
@@ -12,7 +13,7 @@ struct StatementTest{
 
 void testStatements(const std::vector<StatementTest> &testCases)
 {
-    for (const auto &tc : testCases) {
+    for (const auto &tc: testCases) {
         std::cout << tc.description << std::endl;
 
         std::ostringstream out;
@@ -31,7 +32,7 @@ void testStatements(const std::vector<StatementTest> &testCases)
 
 TEST(StatementTest, Blocks)
 {
-    const std::vector<StatementTest> testCases {
+    const std::vector<StatementTest> testCases{
         StatementTest{
             .description = "1. No block",
             .program = "int n = 1; print(n);",
@@ -344,6 +345,188 @@ TEST(StatementTest, StatementOperator)
             .program = "int n = 28; n %= 5; print(n);",
             .expectedOutput = "3\n",
         },
+    };
+
+    testStatements(testCases);
+}
+
+TEST(StatementTest, Functions)
+{
+    const std::vector<StatementTest> testCases{
+        StatementTest{
+            .description = "1. print_str function",
+            .program = "{                               \n"
+                       "    fnc print_str(str s) {      \n"
+                       "        print(s);               \n"
+                       "    }                           \n"
+                       "    print_str(\"hello\");       \n"
+                       "}                               \n",
+            .expectedOutput = "hello\n"
+        },
+        StatementTest{
+            .description = "2. add function",
+            .program = "{                               "
+                       "    fnc add(int n, int m) int {     "
+                       "        return n + m;           "
+                       "    }"
+                       "    print(add(5, 3));           "
+                       "}                               ",
+            .expectedOutput = "8\n"
+        },
+        StatementTest{
+            .description = "3. Declared function scope should not have access to outer variables",
+            .program = "{                   "
+                       "    int n = 0;      "
+                       "    fnc f() {       "
+                       "        print(n);   "
+                       "    }               "
+                       "    f();            "
+                       "}                   ",
+            .shouldThrow = true
+        },
+        StatementTest{
+            .description = "4. Calling a function from a function",
+            .program = "{                           "
+                       "    fnc fa() {              "
+                       "        print(\"hello\");   "
+                       "    }                       "
+                       "    fnc fb() {              "
+                       "        fa();               "
+                       "    }                       "
+                       "    fb();                   "
+                       "}                           ",
+            .expectedOutput = "hello\n"
+        },
+        StatementTest{
+            .description = "5. Function without parameter",
+            .program = "{                           \n"
+                       "    fnc fa() {              \n"
+                       "        print(\"hello\");   \n"
+                       "    }                       \n"
+                       "    fa();                   \n"
+                       "}                           \n",
+            .expectedOutput = "hello\n"
+        },
+        StatementTest{
+            .description = "6. Wrong argument type",
+            .program = "{                                   \n"
+                       "    fnc fa(int a) {                 \n"
+                       "        print(a);                   \n"
+                       "    }                               \n"
+                       "    fa(\"hello\");                  \n"
+                       "}                                   \n",
+            .shouldThrow = true
+        },
+        StatementTest{
+            .description = "7. Number of argument mismatch",
+            .program = "{                                   \n"
+                       "    fnc fa(int a) {                 \n"
+                       "        print(a);                   \n"
+                       "    }                               \n"
+                       "    fa();                           \n"
+                       "}                                   \n",
+            .shouldThrow = true
+        },
+        StatementTest{
+            .description = "8. Trying to call on non-callable object",
+            .program = "{                                   \n"
+                       "    int a;                          \n"
+                       "    a();                            \n"
+                       "}                                   \n",
+            .shouldThrow = true
+        },
+        StatementTest{
+            .description = "9. Assign function return to variable",
+            .program = "{                                       "
+                       "    fnc add(int n, int m) int {     "
+                       "        return n + m;           "
+                       "    }"
+                       "    int n = add(5, 3);"
+                       "    print(n);           "
+                       "}                               ",
+            .expectedOutput = "8\n"
+        },
+        StatementTest{
+            .description = "10. Assign function return to variable wrong type",
+            .program = "{                                       "
+                       "    fnc add(int n, int m) int {     "
+                       "        return n + m;           "
+                       "    }"
+                       "    str n = add(5, 3);"
+                       "}                               ",
+            .shouldThrow = true,
+        },
+        StatementTest{
+            .description = "11. Return an int from a void function",
+            .program = "{                                       "
+                       "    fnc f() {     "
+                       "        return 42;           "
+                       "    }"
+                       "    f();"
+                       "}                               ",
+            .shouldThrow = true,
+        },
+        StatementTest{
+            .description = "12. Return wrong type",
+            .program = "{                                       "
+                       "    fnc f() str {     "
+                       "        return 42;           "
+                       "    }"
+                       "    f();"
+                       "}                               ",
+            .shouldThrow = true,
+        },
+        StatementTest{
+            .description = "13. Return int when the return type is void",
+            .program = "{                                       "
+                       "    fnc f() {     "
+                       "        return 42;           "
+                       "    }"
+                       "    f();"
+                       "}                               ",
+            .shouldThrow = true,
+        },
+        StatementTest{
+            .description = "14. Return nothing when the return type is int",
+            .program = "{                                       "
+                       "    fnc f() int {     "
+                       "        return;           "
+                       "    }"
+                       "    f();"
+                       "}                               ",
+            .shouldThrow = true,
+        },
+        StatementTest{
+            .description = "15. Function of return type int never return",
+            .program = "{                                       "
+                       "    fnc f() int {     "
+                       "    }"
+                       "    f();"
+                       "}                               ",
+            .shouldThrow = true,
+        },
+        StatementTest{
+            .description = "16. Recursive function",
+            .program = "{                                       "
+                       "    fnc power(int x, int n) int {"
+                       "        if (n == 0) {"
+                       "            return 1;"
+                       "        }"
+                       "        if (n == 1) {"
+                       "            return x;"
+                       "        }"
+                       "        return power(x, n - 1) * x;"
+                       "    }"
+                       "    print(power(2, 0));"
+                       "    print(power(2, 1));"
+                       "    print(power(2, 2));"
+                       "    print(power(2, 8));"
+                       "}                               ",
+                       .expectedOutput = "1\n"
+                                         "2\n"
+                                         "4\n"
+                                         "256\n"
+        }
     };
 
     testStatements(testCases);

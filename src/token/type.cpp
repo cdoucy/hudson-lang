@@ -5,7 +5,9 @@
 
 static const std::unordered_map<Token::Type, std::string> tokenTypesString{
     {Token::INT_TYPE, "int"},
-    {Token::STR_TYPE, "str"}
+    {Token::STR_TYPE, "str"},
+    {Token::FNC_TYPE, "fnc"},
+    {Token::VOID_TYPE, "void"}
 };
 
 static const std::string unknownType{"unknown"};

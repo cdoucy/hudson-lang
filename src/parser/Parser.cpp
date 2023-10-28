@@ -31,18 +31,20 @@ ast::ProgramNode::ptr Parser::parseProgram()
 ast::StatementNode::ptr Parser::parseStatement()
 {
     static const std::vector<ast::StatementNode::ptr(Parser::*)()> statementsParser{
+        &Parser::parseFunction,
         &Parser::parseAssignmentStatement,
         &Parser::parseIncrementStatement,
         &Parser::parseExpressionStatement,
         &Parser::parseDeclarationStatement,
         &Parser::parsePrint,
-        &Parser::parseBlock,
+        &Parser::parseBlockStatement,
         &Parser::parseWhile,
         &Parser::parseConditions,
-        &Parser::parseFor
+        &Parser::parseFor,
+        &Parser::parseReturnStatement
     };
 
-    for (const auto &parse : statementsParser) {
+    for (const auto &parse: statementsParser) {
         const auto &stmt = (this->*parse)();
         if (stmt)
             return stmt;
@@ -121,6 +123,21 @@ ast::StatementNode::ptr Parser::parseIncrementStatement()
     return increment;
 }
 
+ast::StatementNode::ptr Parser::parseReturnStatement()
+{
+    auto stmt = this->parseReturn();
+    if (!stmt)
+        return nullptr;
+
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+
+    this->_tokenItr.advance();
+
+    return stmt;
+}
+
 ast::IncrementNode::ptr Parser::parseIncrement()
 {
     auto token = this->_tokenItr.get();
@@ -136,23 +153,25 @@ ast::IncrementNode::ptr Parser::parseIncrement()
     return ast::IncrementNode::create(token->getLexeme(), nextToken->getType());
 }
 
-ast::DeclarationNode::ptr Parser::parseDeclaration()
+ast::StatementNode::ptr Parser::parseReturn()
 {
     auto token = this->_tokenItr.get();
-    if (!token || (!token->isType(Token::INT_TYPE) && !token->isType(Token::STR_TYPE)))
+    if (!token || !token->isType(Token::RETURN))
+        return nullptr;
+    this->_tokenItr.advance();
+
+    auto expr = this->parseExpression();
+
+    return ast::ReturnNode::create(expr);
+}
+
+ast::DeclarationNode::ptr Parser::parseDeclaration()
+{
+    auto typeIdent = this->parseTypeIdent();
+    if (!typeIdent)
         return nullptr;
 
-    Token::Type declarationType = token->getType();
-    this->_tokenItr.advance();
-
-    token = this->_tokenItr.get();
-    if (!token || !token->isType(Token::IDENTIFIER))
-        throw syntaxError("expecting identifier", *this->_tokenItr.prev());
-
-    std::string identifier(token->getLexeme());
-    this->_tokenItr.advance();
-
-    token = this->_tokenItr.get();
+    auto token = this->_tokenItr.get();
     ast::ExpressionNode::ptr expr;
 
     if (token && token->isType(Token::ASSIGN)) {
@@ -163,20 +182,20 @@ ast::DeclarationNode::ptr Parser::parseDeclaration()
             throw syntaxError("expecting expression", *token);
     }
 
-    return ast::DeclarationNode::create(declarationType, identifier, expr);
+    return ast::DeclarationNode::create(typeIdent->second, typeIdent->first, expr);
 }
 
 ast::AssignmentNode::ptr Parser::parseAssignment()
 {
     auto token = this->_tokenItr.get();
-     if (!token || !token->isType(Token::IDENTIFIER))
+    if (!token || !token->isType(Token::IDENTIFIER))
         return nullptr;
 
-     std::string identifier(token->getLexeme());
+    std::string identifier(token->getLexeme());
 
-     auto nextToken = this->_tokenItr.next();
-     if (!nextToken || !nextToken->isAssignableOperator())
-         return nullptr;
+    auto nextToken = this->_tokenItr.next();
+    if (!nextToken || !nextToken->isAssignableOperator())
+        return nullptr;
     this->_tokenItr.advance();
 
     token = this->_tokenItr.get();
@@ -233,7 +252,12 @@ ast::StatementNode::ptr Parser::parsePrint()
     return ast::PrintNode::create(expr);
 }
 
-ast::StatementNode::ptr Parser::parseBlock()
+ast::StatementNode::ptr Parser::parseBlockStatement()
+{
+    return this->parseBlock();
+}
+
+ast::BlockNode::ptr Parser::parseBlock()
 {
     auto token = this->_tokenItr.get();
     if (!token || !token->isType(Token::OPEN_BRACKET))
@@ -343,6 +367,74 @@ ast::StatementNode::ptr Parser::parseFor()
     return ast::ForNode::create(expr, initStmt, stepStatement, stmt);
 }
 
+ast::StatementNode::ptr Parser::parseFunction()
+{
+    auto fncToken = this->_tokenItr.get();
+    if (!fncToken || !fncToken->isType(Token::FNC))
+        return nullptr;
+    this->_tokenItr.advance();
+
+    auto identToken = this->_tokenItr.get();
+    if (!identToken || !identToken->isType(Token::IDENTIFIER))
+        throw syntaxError("expecting identifier", *fncToken);
+    this->_tokenItr.advance();
+
+    auto open_p = this->_tokenItr.get();
+    if (!open_p || !open_p->isType(Token::OPEN_PARENTHESIS))
+        throw syntaxError("expecting '('", *identToken);
+    this->_tokenItr.advance();
+
+    std::map<std::string, bool> paramsMap;
+    std::vector<ast::FunctionNode::Param> params;
+    auto typeIdent = this->parseTypeIdent();
+
+    while (typeIdent) {
+
+        if (paramsMap.find(typeIdent->first) != paramsMap.end())
+            throw syntaxError("parameter name already used", *this->_tokenItr.prev());
+
+        paramsMap.insert({typeIdent->first, true});
+        params.push_back(ast::FunctionNode::Param{
+            .name = typeIdent->first,
+            .type = typeIdent->second
+        });
+
+        auto token = this->_tokenItr.get();
+        if (!token || !token->isType(Token::COMMA))
+            break;
+        this->_tokenItr.advance();
+
+        typeIdent = this->parseTypeIdent();
+    }
+
+    auto close_p = this->_tokenItr.get();
+    if (!close_p || !close_p->isType(Token::CLOSE_PARENTHESIS))
+        throw syntaxError("unmatched '('", *open_p);
+    this->_tokenItr.advance();
+
+    auto token = this->_tokenItr.get();
+    if (!token)
+        throw syntaxError("expecting return type or block", *this->_tokenItr.prev());
+
+    Token::Type returnType = Token::VOID_TYPE;
+    if (token->isType(Token::INT_TYPE) || token->isType(Token::STR_TYPE)) {
+        returnType = token->getType();
+        this->_tokenItr.advance();
+    }
+
+    auto block = this->parseBlock();
+    if (block == nullptr)
+        throw syntaxError("expecting function body", *identToken);
+
+    return ast::FunctionNode::create(
+        identToken->getLexeme(),
+        params,
+        returnType,
+        block
+    );
+}
+
+
 ast::InitStatementNode::ptr Parser::parseInitStatement()
 {
     auto decl = this->parseDeclaration();
@@ -399,7 +491,7 @@ ast::ExpressionNode::ptr Parser::parseLogicalOr()
 {
     return this->parseBinaryExpression(
         {Token::OR},
-        [this]() {return this->parseLogicalAnd();},
+        [this]() { return this->parseLogicalAnd(); },
         true
     );
 }
@@ -408,7 +500,7 @@ ast::ExpressionNode::ptr Parser::parseLogicalAnd()
 {
     return this->parseBinaryExpression(
         {Token::AND},
-        [this]() {return this->parseBitwiseOr();},
+        [this]() { return this->parseBitwiseOr(); },
         true
     );
 }
@@ -417,7 +509,7 @@ ast::ExpressionNode::ptr Parser::parseBitwiseOr()
 {
     return this->parseBinaryExpression(
         {Token::BITWISE_OR},
-        [this](){return this->parseBitwiseXor();}
+        [this]() { return this->parseBitwiseXor(); }
     );
 }
 
@@ -425,7 +517,7 @@ ast::ExpressionNode::ptr Parser::parseBitwiseXor()
 {
     return this->parseBinaryExpression(
         {Token::BITWISE_XOR},
-        [this](){return this->parseBitwiseAnd();}
+        [this]() { return this->parseBitwiseAnd(); }
     );
 }
 
@@ -433,7 +525,7 @@ ast::ExpressionNode::ptr Parser::parseBitwiseAnd()
 {
     return this->parseBinaryExpression(
         {Token::BITWISE_AND},
-        [this](){return this->parseEquality();}
+        [this]() { return this->parseEquality(); }
     );
 }
 
@@ -441,7 +533,7 @@ ast::ExpressionNode::ptr Parser::parseEquality()
 {
     return this->parseBinaryExpression(
         {Token::EQUAL, Token::NOT_EQUAL},
-        [this]() {return this->parseComparison();}
+        [this]() { return this->parseComparison(); }
     );
 }
 
@@ -449,7 +541,7 @@ ast::ExpressionNode::ptr Parser::parseComparison()
 {
     return this->parseBinaryExpression(
         {Token::GT, Token::GTE, Token::LT, Token::LTE},
-        [this]() {return this->parseBitshift();}
+        [this]() { return this->parseBitshift(); }
     );
 }
 
@@ -457,7 +549,7 @@ ast::ExpressionNode::ptr Parser::parseBitshift()
 {
     return this->parseBinaryExpression(
         {Token::BITWISE_LSHIFT, Token::BITWISE_RSHIFT},
-        [this]() {return this->parseTerm();}
+        [this]() { return this->parseTerm(); }
     );
 }
 
@@ -465,7 +557,7 @@ ast::ExpressionNode::ptr Parser::parseTerm()
 {
     return this->parseBinaryExpression(
         {Token::PLUS, Token::MINUS},
-        [this]() {return this->parseFactor();}
+        [this]() { return this->parseFactor(); }
     );
 }
 
@@ -473,7 +565,7 @@ ast::ExpressionNode::ptr Parser::parseFactor()
 {
     return this->parseBinaryExpression(
         {Token::MULT, Token::MOD, Token::DIV},
-        [this]() {return this->parseUnary();}
+        [this]() { return this->parseUnary(); }
     );
 }
 
@@ -484,7 +576,7 @@ ast::ExpressionNode::ptr Parser::parseUnary()
         return nullptr;
 
     if (!token->isTypeAnyOf({Token::PLUS, Token::MINUS, Token::NOT, Token::BITWISE_NOT}))
-        return this->parsePrimary();
+        return this->parseCall();
 
     this->_tokenItr.advance();
 
@@ -493,6 +585,59 @@ ast::ExpressionNode::ptr Parser::parseUnary()
         throw syntaxError("expecting expression", *token);
 
     return ast::UnaryNode::create(token->getType(), expression);
+}
+
+ast::ExpressionNode::ptr Parser::parseCall()
+{
+    auto expr = this->parsePrimary();
+    ast::ExpressionNode::ptr ret;
+
+    auto open_p = this->_tokenItr.get();
+    while (open_p && open_p->isType(Token::OPEN_PARENTHESIS)) {
+        this->_tokenItr.advance();
+
+        auto token = this->_tokenItr.get();
+        if (!token)
+            throw syntaxError("expecting argument or \")\"", *open_p);
+
+        std::vector<ast::ExpressionNode::ptr> params;
+
+        // Handle function call without arguments, eg f()
+        if (!token->isType(Token::CLOSE_PARENTHESIS)) {
+            params = this->parseParams();
+            auto close_p = this->_tokenItr.get();
+            if (!close_p || !close_p->isType(Token::CLOSE_PARENTHESIS))
+                throw syntaxError("unmatched parenthesis", *open_p);
+        }
+
+        this->_tokenItr.advance();
+        expr = ast::CallNode::create(expr, params);
+        open_p = this->_tokenItr.get();
+    }
+
+    return expr;
+}
+
+std::vector<ast::ExpressionNode::ptr> Parser::parseParams()
+{
+    auto expr = this->parseExpression();
+    if (!expr)
+        return {};
+
+    std::vector<ast::ExpressionNode::ptr> params = {expr};
+
+    auto comma = this->_tokenItr.get();
+    while (comma && comma->isType(Token::COMMA)) {
+        this->_tokenItr.advance();
+        expr = this->parseExpression();
+        if (!expr)
+            throw syntaxError("expecting expression after ','", *comma);
+
+        params.push_back(expr);
+        comma = this->_tokenItr.get();
+    }
+
+    return params;
 }
 
 ast::ExpressionNode::ptr Parser::parsePrimary()
@@ -504,7 +649,7 @@ ast::ExpressionNode::ptr Parser::parsePrimary()
         &Parser::parseGrouping
     };
 
-    for (const auto &parse : primaryParsers) {
+    for (const auto &parse: primaryParsers) {
         const auto &expr = (this->*parse)();
         if (expr)
             return expr;
@@ -639,4 +784,21 @@ ast::ExpressionNode::ptr Parser::parseParenthesizedExpression(const Token &prevT
     this->_tokenItr.advance();
 
     return expr;
+}
+
+std::optional<std::pair<std::string, Token::Type>> Parser::parseTypeIdent()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || (!token->isType(Token::INT_TYPE) && !token->isType(Token::STR_TYPE)))
+        return {};
+
+    Token::Type declarationType = token->getType();
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::IDENTIFIER))
+        throw syntaxError("expecting identifier", *this->_tokenItr.prev());
+    this->_tokenItr.advance();
+
+    return std::make_pair(token->getLexeme(), declarationType);
 }

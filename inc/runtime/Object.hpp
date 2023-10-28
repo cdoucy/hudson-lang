@@ -1,8 +1,10 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 
 #include "token.hpp"
+#include "FunctionNode.hpp"
 
 namespace runtime
 {
@@ -16,6 +18,7 @@ namespace runtime
             Object(Token::Type type, std::string identifier = "");
             Object(Token::Integer i, std::string identifier = "");
             Object(Token::String s, std::string identifier = "");
+            explicit Object(const ast::FunctionNode &function);
             ~Object() = default;
 
             [[nodiscard]] const std::string &getIdentifier() const;
