@@ -294,12 +294,7 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
         auto namedParam = namedParams[i];
 
         if (evaluatedParam.getType() != namedParam.type)
-            throw LogicalError(fmt::format(
-                "invalid type in call : {} is of type {} but expected type {}",
-                namedParam.name,
-                Token::typeToString(evaluatedParam.getType()),
-                Token::typeToString(namedParam.type)
-            ));
+            throw invalidArgType(namedParam.name, evaluatedParam.getType(), namedParam.type);
 
         state->set(namedParam.name, evaluatedParam);
     }
@@ -315,30 +310,17 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
         if (ret.hasValue()) {
             const auto& obj = ret.getObject();
 
-            if (obj.getType() != function.getReturnType()) {
-                throw LogicalError(fmt::format(
-                    "invalid return type in call : returned object is of type {}, but expected return type is {}",
-                    Token::typeToString(obj.getType()),
-                    Token::typeToString(function.getReturnType())
-                ));
-            }
+            if (obj.getType() != function.getReturnType())
+                throw invalidReturnType(obj.getType(), function.getReturnType());
 
             this->_expressionResult = obj;
-        } else if (function.getReturnType() != Token::VOID_TYPE) {
-            throw LogicalError(
-                fmt::format(
-                    "invalid return type in call : returned object is of type {}, but expected return type is {}",
-                    Token::typeToString(Token::VOID_TYPE),
-                    Token::typeToString(function.getReturnType())
-                ));
-        }
+
+        } else if (function.getReturnType() != Token::VOID_TYPE)
+            throw invalidReturnType(Token::Type::VOID_TYPE, function.getReturnType());
     }
 
     if (!hasReturned && function.getReturnType() != Token::VOID_TYPE)
-        throw LogicalError(fmt::format(
-            "return statement is missing in call that should have been return an object of type {}",
-            Token::typeToString(function.getReturnType())
-        ));
+        throw missingReturn(function.getReturnType());
 
     this->_localState = std::move(originalState);
 }
@@ -351,4 +333,29 @@ void ast::EvalVisitor::visit(ast::ReturnNode &node)
         returnedObject = this->evaluate(node.getExpression());
 
     throw runtime::Return(returnedObject);
+}
+
+LogicalError ast::EvalVisitor::invalidArgType(std::string paramName, Token::Type actualType, Token::Type expectedType) {
+    return LogicalError(fmt::format(
+        "invalid type in call : {} is of type {} but expected type {}",
+        paramName,
+        Token::typeToString(actualType),
+        Token::typeToString(expectedType)
+    ));
+}
+
+LogicalError ast::EvalVisitor::invalidReturnType(Token::Type actualType, Token::Type expectedType) {
+    return LogicalError(fmt::format(
+        "invalid return type in call : returned object is of type {}, but expected return type is {}",
+        Token::typeToString(actualType),
+        Token::typeToString(expectedType)
+    ));
+}
+
+LogicalError ast::EvalVisitor::missingReturn(Token::Type actualType)
+{
+    return LogicalError(fmt::format(
+        "return statement is missing in call that should have been return an object of type {}",
+        Token::typeToString(actualType)
+    ));
 }

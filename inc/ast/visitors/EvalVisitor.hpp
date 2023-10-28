@@ -76,5 +76,9 @@ namespace ast
 
             const runtime::Object &evaluate(const ast::ExpressionNode::ptr &expr);
 
+        static LogicalError invalidArgType(std::string paramName, Token::Type actualType, Token::Type expectedType);
+        static LogicalError invalidReturnType(Token::Type actualType, Token::Type expectedType);
+        static LogicalError missingReturn(Token::Type actualType);
+
     };
 };
