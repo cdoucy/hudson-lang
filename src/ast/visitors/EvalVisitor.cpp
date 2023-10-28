@@ -295,7 +295,7 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
 
         if (evaluatedParam.getType() != namedParam.type)
             throw LogicalError(fmt::format(
-                "invalid type in function call : {} is of type {} but expected type {}",
+                "invalid type in call : {} is of type {} but expected type {}",
                 namedParam.name,
                 Token::typeToString(evaluatedParam.getType()),
                 Token::typeToString(namedParam.type)
@@ -306,13 +306,39 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
 
     auto originalState = std::move(this->_localState);
     this->_localState = state;
+    bool hasReturned = false;
 
     try {
         function.getBlock()->accept(*this);
     } catch (const runtime::Return &ret) {
-        if (ret.hasValue())
-            this->_expressionResult = ret.getObject();
+        hasReturned = true;
+        if (ret.hasValue()) {
+            const auto& obj = ret.getObject();
+
+            if (obj.getType() != function.getReturnType()) {
+                throw LogicalError(fmt::format(
+                    "invalid return type in call : returned object is of type {}, but expected return type is {}",
+                    Token::typeToString(obj.getType()),
+                    Token::typeToString(function.getReturnType())
+                ));
+            }
+
+            this->_expressionResult = obj;
+        } else if (function.getReturnType() != Token::VOID_TYPE) {
+            throw LogicalError(
+                fmt::format(
+                    "invalid return type in call : returned object is of type {}, but expected return type is {}",
+                    Token::typeToString(Token::VOID_TYPE),
+                    Token::typeToString(function.getReturnType())
+                ));
+        }
     }
+
+    if (!hasReturned && function.getReturnType() != Token::VOID_TYPE)
+        throw LogicalError(fmt::format(
+            "return statement is missing in call that should have been return an object of type {}",
+            Token::typeToString(function.getReturnType())
+        ));
 
     this->_localState = std::move(originalState);
 }
