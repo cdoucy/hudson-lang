@@ -28,6 +28,8 @@ class Parser
         ast::StatementNode::ptr parseAssignmentStatement();
         ast::StatementNode::ptr parseIncrementStatement();
         ast::StatementNode::ptr parseReturnStatement();
+        ast::StatementNode::ptr parseBreakStatement();
+        ast::StatementNode::ptr parseContinueStatement();
         ast::DeclarationNode::ptr parseDeclaration();
         ast::AssignmentNode::ptr parseAssignment();
         ast::IncrementNode::ptr parseIncrement();

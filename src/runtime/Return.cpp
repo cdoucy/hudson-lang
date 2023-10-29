@@ -3,7 +3,8 @@
 
 
 runtime::Return::Return(std::optional<Object> object) noexcept
-:   _object(std::move(object))
+:   Jump("return", "function"),
+    _object(std::move(object))
 {}
 
 bool runtime::Return::hasValue() const noexcept

@@ -39,12 +39,17 @@ set(SOURCES
     ${PROJECT_ROOT}/src/ast/nodes/FunctionNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/CallNode.cpp
     ${PROJECT_ROOT}/src/ast/nodes/ReturnNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/BreakNode.cpp
+    ${PROJECT_ROOT}/src/ast/nodes/ContinueNode.cpp
 
     ${PROJECT_ROOT}/src/ast/visitors/EvalVisitor.cpp
 
     ${PROJECT_ROOT}/src/runtime/Object.cpp
     ${PROJECT_ROOT}/src/runtime/object_operators.cpp
     ${PROJECT_ROOT}/src/runtime/State.cpp
+    ${PROJECT_ROOT}/src/runtime/Jump.cpp
+    ${PROJECT_ROOT}/src/runtime/Break.cpp
+    ${PROJECT_ROOT}/src/runtime/Continue.cpp
     ${PROJECT_ROOT}/src/runtime/Return.cpp
 
     ${PROJECT_ROOT}/src/repl/repl.cpp

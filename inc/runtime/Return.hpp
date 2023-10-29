@@ -1,13 +1,13 @@
 #pragma once
 
-#include <exception>
 #include <optional>
 
+#include "Jump.hpp"
 #include "Object.hpp"
 
 namespace runtime
 {
-    class Return : public std::exception
+    class Return : public Jump
     {
         public:
             explicit Return(std::optional<Object> object) noexcept;

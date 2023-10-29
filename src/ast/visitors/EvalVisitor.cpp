@@ -2,6 +2,8 @@
 
 #include "EvalVisitor.hpp"
 #include "Return.hpp"
+#include "Break.hpp"
+#include "Continue.hpp"
 
 #define OPERATOR_FUNCTION(type, op) {type, [](const auto &l, const auto &r){return l op r;}}
 
@@ -154,8 +156,13 @@ void ast::EvalVisitor::visit(ast::BlockNode &node)
 {
     this->_localState = runtime::State::create(this->_localState);
 
-    for (const auto &stmt : node.getStatements()) {
-        stmt->accept(*this);
+    try {
+        for (const auto &stmt: node.getStatements()) {
+            stmt->accept(*this);
+        }
+    } catch (const LogicalError &err) {
+        this->_localState = this->_localState->restoreParent();
+        throw err;
     }
 
     this->_localState = this->_localState->restoreParent();
@@ -205,8 +212,13 @@ void ast::EvalVisitor::visit(ast::WhileNode &node)
     auto obj = this->evaluate(node.getExpression());
 
     while (obj) {
-        if (stmt)
-            stmt->accept(*this);
+        try {
+            if (stmt)
+                stmt->accept(*this);
+        } catch (const runtime::Break &_) {
+            break;
+        } catch (const runtime::Continue &_) {
+        }
 
         obj = this->evaluate(node.getExpression());
     }
@@ -237,8 +249,14 @@ void ast::EvalVisitor::visit(ast::ForNode &node)
     }
 
     while (this->evaluate(expr)) {
-        if (stmt)
-            stmt->accept(*this);
+
+        try {
+            if (stmt)
+                stmt->accept(*this);
+        } catch (const runtime::Break &_) {
+            break;
+        } catch (const runtime::Continue &_) {
+        }
 
         if (step)
             step->accept(*this);
@@ -302,13 +320,10 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
     auto originalState = std::move(this->_localState);
     this->_localState = state;
     bool hasReturned = false;
-    bool previousExecCall = this->_isExecutingCall;
-    this->_isExecutingCall = true;
 
     try {
         function.getBlock()->accept(*this);
     } catch (const runtime::Return &ret) {
-        this->_isExecutingCall = previousExecCall;
         this->_localState = std::move(originalState);
         originalState = nullptr;
 
@@ -324,9 +339,10 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
 
         } else if (function.getReturnType() != Token::VOID_TYPE)
             throw invalidReturnType(Token::Type::VOID_TYPE, function.getReturnType());
+    } catch (const LogicalError &err) {
+        this->_localState = std::move(originalState);
+        throw err;
     }
-
-    this->_isExecutingCall = previousExecCall;
 
     if (!hasReturned && function.getReturnType() != Token::VOID_TYPE)
         throw missingReturn(function.getReturnType());
@@ -337,15 +353,24 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
 
 void ast::EvalVisitor::visit(ast::ReturnNode &node)
 {
-    if (!this->_isExecutingCall)
-        throw LogicalError("return statement used outside of a function");
-
     std::optional<runtime::Object> returnedObject;
 
     if (node.getExpression())
         returnedObject = this->evaluate(node.getExpression());
 
     throw runtime::Return(returnedObject);
+}
+
+void ast::EvalVisitor::visit(ast::BreakNode &_)
+{
+    (void)_;
+    throw runtime::Break();
+}
+
+void ast::EvalVisitor::visit(ast::ContinueNode &_)
+{
+    (void)_;
+    throw runtime::Continue();
 }
 
 LogicalError ast::EvalVisitor::invalidArgType(std::string paramName, Token::Type actualType, Token::Type expectedType) {

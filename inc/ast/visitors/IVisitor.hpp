@@ -24,6 +24,9 @@ namespace ast
     class CallNode;
     class ReturnNode;
 
+    class BreakNode;
+    class ContinueNode;
+
     class ProgramNode;
 
     class IVisitor
@@ -51,6 +54,9 @@ namespace ast
             virtual void visit(FunctionNode &node) = 0;
             virtual void visit(CallNode &node) = 0;
             virtual void visit(ReturnNode &node) = 0;
+
+            virtual void visit(BreakNode &node) = 0;
+            virtual void visit(ContinueNode &node) = 0;
 
             virtual void visit(ProgramNode &node) = 0;
     };

@@ -573,3 +573,88 @@ TEST(StatementTest, ReturnOutsideOfFunction)
 
     testStatements(testCases);
 }
+
+TEST(StatementTest, BreakAndContinue)
+{
+    std::vector<StatementTest> testCases{
+        StatementTest{
+            .description = "1. break outside of a loop",
+            .program = "break;",
+            .shouldThrow = true,
+        },
+        StatementTest{
+            .description = "2. continue outside of a loop",
+            .program = "continue;",
+            .shouldThrow = true,
+        },
+        StatementTest{
+            .description = "3. break in for loop",
+            .program = "{                                   \n"
+                       "    for (int i = 0; i < 10; i++) {  \n"
+                       "        print(i);                   \n"
+                       "        break;                      \n"
+                       "    }                               \n"
+                       "}                                   \n",
+            .expectedOutput = "0\n"
+        },
+        StatementTest{
+            .description = "4. continue in for loop",
+            .program = "{"
+                       "    for (int i = 0; i < 4; i++) {"
+                       "        if (i % 2 == 0)"
+                       "            continue;"
+                       "        print(i);"
+                       "    }"
+                       "}",
+            .expectedOutput = "1\n3\n"
+        },
+        StatementTest{
+            .description = "5. break in while loop",
+            .program = "{"
+                       "    int i = 0;"
+                       "    while (1) {"
+                       "        if (i == 1)"
+                       "            break;"
+                       "        print(i);"
+                       "        i++;"
+                       "    }"
+                       "}",
+            .expectedOutput = "0\n"
+        },
+        StatementTest{
+            .description = "6. continue and break mixed in while loop",
+            .program = "{"
+                       "    int i = 0;"
+                       "    while (1) {"
+                       "        if (i != 10) {"
+                       "            i++;"
+                       "            continue;"
+                       "        }"
+                       "        print(i);"
+                       "        break;"
+                       "    }"
+                       "}",
+            .expectedOutput = "10\n"
+        },
+        StatementTest{
+            .description = "7. For loop continue no block",
+            .program = "{"
+                       "    int i = 0;"
+                       "    for (; i < 10; i++) continue;"
+                       "    print(i);"
+                       "}",
+            .expectedOutput = "10\n"
+        },
+        StatementTest{
+            .description = "8. For loop break no block",
+            .program = "{"
+                       "    int i = 0;"
+                       "    for (; i < 10; i++) break;"
+                       "    print(i);"
+                       "}",
+            .expectedOutput = "0\n"
+        }
+    };
+
+    testStatements(testCases);
+}
