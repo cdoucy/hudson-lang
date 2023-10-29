@@ -249,6 +249,20 @@ TEST(LexerTest, KeyWords)
             .expected = {
                 Token{Token::RETURN, "return"}
             }
+        },
+        LexerTest{
+            .description = "7. break",
+            .expression = "break",
+            .expected = {
+                Token{Token::BREAK, "break"}
+            }
+        },
+        LexerTest{
+            .description = "8. continue",
+            .expression = "continue",
+            .expected = {
+                Token{Token::CONTINUE, "continue"}
+            }
         }
 
     };

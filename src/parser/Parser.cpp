@@ -41,7 +41,9 @@ ast::StatementNode::ptr Parser::parseStatement()
         &Parser::parseWhile,
         &Parser::parseConditions,
         &Parser::parseFor,
-        &Parser::parseReturnStatement
+        &Parser::parseReturnStatement,
+        &Parser::parseBreakStatement,
+        &Parser::parseContinueStatement
     };
 
     for (const auto &parse: statementsParser) {
@@ -136,6 +138,36 @@ ast::StatementNode::ptr Parser::parseReturnStatement()
     this->_tokenItr.advance();
 
     return stmt;
+}
+
+ast::StatementNode::ptr Parser::parseBreakStatement()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::BREAK))
+        return nullptr;
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+    this->_tokenItr.advance();
+
+    return ast::BreakNode::create();
+}
+
+ast::StatementNode::ptr Parser::parseContinueStatement()
+{
+    auto token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::CONTINUE))
+        return nullptr;
+    this->_tokenItr.advance();
+
+    token = this->_tokenItr.get();
+    if (!token || !token->isType(Token::SEMICOLON))
+        throw syntaxError("expecting \";\"", *this->_tokenItr.prev());
+    this->_tokenItr.advance();
+
+    return ast::ContinueNode::create();
 }
 
 ast::IncrementNode::ptr Parser::parseIncrement()

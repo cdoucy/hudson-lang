@@ -46,6 +46,7 @@ class Token
             IF, ELSE,
             FOR,
             FNC, RETURN,
+            BREAK, CONTINUE,
 
             // Identifier
             IDENTIFIER

@@ -25,6 +25,9 @@
 #include "ReturnNode.hpp"
 #include "CallNode.hpp"
 
+#include "BreakNode.hpp"
+#include "ContinueNode.hpp"
+
 #include "ProgramNode.hpp"
 
 #include "State.hpp"
@@ -59,6 +62,9 @@ namespace ast
             void visit(CallNode &node) final;
             void visit(ReturnNode &node) final;
 
+            void visit(BreakNode &node) final;
+            void visit(ContinueNode &node) final;
+
             void visit(ProgramNode &node) final;
 
             [[nodiscard]] const runtime::Object &value() const noexcept;
@@ -73,7 +79,6 @@ namespace ast
             runtime::Object _expressionResult;
             runtime::State::ptr _globalState;
             runtime::State::ptr _localState;
-            bool _isExecutingCall;
 
             const runtime::Object &evaluate(const ast::ExpressionNode::ptr &expr);
 

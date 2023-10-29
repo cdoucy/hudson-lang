@@ -1,4 +1,6 @@
 #include "Evaluator.hpp"
+#include "Break.hpp"
+#include "Continue.hpp"
 
 void Evaluator::feed(const std::string &expression)
 {
@@ -6,8 +8,14 @@ void Evaluator::feed(const std::string &expression)
 
     auto root = this->_parser.getAstRoot();
 
-    if (root)
-        root->accept(this->_evalVisitor);
+    if (root) {
+
+        try {
+            root->accept(this->_evalVisitor);
+        } catch (const runtime::Jump &jump) {
+            throw LogicalError(jump.what());
+        }
+    }
 
     this->_parser.clear();
 }
