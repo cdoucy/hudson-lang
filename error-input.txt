@@ -1,5 +1,3 @@
-fnc f() int {
-}
+int x = "";
 
-f()();
-print(f());
+return;

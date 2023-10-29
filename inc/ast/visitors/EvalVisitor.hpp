@@ -73,6 +73,7 @@ namespace ast
             runtime::Object _expressionResult;
             runtime::State::ptr _globalState;
             runtime::State::ptr _localState;
+            bool _isExecutingCall;
 
             const runtime::Object &evaluate(const ast::ExpressionNode::ptr &expr);
 
