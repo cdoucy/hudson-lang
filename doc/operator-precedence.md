@@ -1,12 +1,14 @@
 
 ```
 program                 -> statement* EOF
-statement               -> expressionStatement | declarationStatement | assignmentStatement | incDecStatement | returnStatement | print | block | while | for | if | function
+statement               -> expressionStatement | declarationStatement | assignmentStatement | incDecStatement | returnStatement | breakStatement | continueStatement | print | block | while | for | if | function
 expressionStatement     -> expression ';'
 declarationStatement    -> declaration ';'
 assignementStatement    -> assignement ';'
 incDecStatement         -> incDec ';'
 returnStatement         -> return (expression)? ';'
+breakStatement          -> break ';'
+continueStatement       -> continue ';'
 declaration             -> Type Identifier ('=' expression)?
 assignment              -> Identifier assimentOperator expression
 assignmentOperator      -> '=' | '+= | '+-' | '*=' | '%=' | '/='

@@ -19,6 +19,8 @@ void runFileMode(const std::string &filePath)
 
 int main(int ac, char **av)
 {
+    for (int i = 0; i < 10; i++) continue;
+
     try {
         if (ac < 2)
             runInteractiveMode();

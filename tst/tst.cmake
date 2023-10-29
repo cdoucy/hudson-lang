@@ -5,5 +5,5 @@ set(
     ${PROJECT_ROOT}/tst/evaluator/evaluator_test.cpp
     ${PROJECT_ROOT}/tst/evaluator/statements_test.cpp
     ${PROJECT_ROOT}/tst/parser/parser_test.cpp
-    ${PROJECT_ROOT}/tst/parser/functions_error_test.cpp
+    ${PROJECT_ROOT}/tst/parser/parser_error_test.cpp
 )
