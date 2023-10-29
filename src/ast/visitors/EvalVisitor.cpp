@@ -302,11 +302,18 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
     auto originalState = std::move(this->_localState);
     this->_localState = state;
     bool hasReturned = false;
+    bool previousExecCall = this->_isExecutingCall;
+    this->_isExecutingCall = true;
 
     try {
         function.getBlock()->accept(*this);
     } catch (const runtime::Return &ret) {
+        this->_isExecutingCall = previousExecCall;
+        this->_localState = std::move(originalState);
+        originalState = nullptr;
+
         hasReturned = true;
+
         if (ret.hasValue()) {
             const auto& obj = ret.getObject();
 
@@ -319,14 +326,20 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
             throw invalidReturnType(Token::Type::VOID_TYPE, function.getReturnType());
     }
 
+    this->_isExecutingCall = previousExecCall;
+
     if (!hasReturned && function.getReturnType() != Token::VOID_TYPE)
         throw missingReturn(function.getReturnType());
 
-    this->_localState = std::move(originalState);
+    if (originalState)
+        this->_localState = std::move(originalState);
 }
 
 void ast::EvalVisitor::visit(ast::ReturnNode &node)
 {
+    if (!this->_isExecutingCall)
+        throw LogicalError("return statement used outside of a function");
+
     std::optional<runtime::Object> returnedObject;
 
     if (node.getExpression())

@@ -531,3 +531,45 @@ TEST(StatementTest, Functions)
 
     testStatements(testCases);
 }
+
+TEST(StatementTest, ReturnOutsideOfFunction)
+{
+    std::vector<StatementTest> testCases{
+          StatementTest{
+              .description = "1. Return outside of function",
+              .program = "return;",
+              .shouldThrow = true
+          },
+          StatementTest{
+              .description = "2. two functions with return",
+              .program = "{"
+                         "  fnc fa() int {"
+                         "      return 1;"
+                         "  }"
+                         "  fnc fb() int {"
+                         "      return fa();"
+                         "  }"
+                         "  print(fb());"
+                         "}",
+            .expectedOutput = "1\n",
+            .shouldThrow = false
+          },
+          StatementTest{
+              .description = "3. two functions with return #2",
+              .program = "{"
+                         "  fnc fa() int {"
+                         "      return 1;"
+                         "  }"
+                         "  fnc fb() int {"
+                         "      int ret = fa();"
+                         "      return ret;"
+                         "  }"
+                         "  print(fb());"
+                         "}",
+              .expectedOutput = "1\n",
+              .shouldThrow = false
+          }
+    };
+
+    testStatements(testCases);
+}
