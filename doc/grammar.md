@@ -6,7 +6,7 @@ The specification of the Hudson programming language in EBNF notation is the fol
 program         =   { stmt }
 stmt            =   expr_stmt       |   declaration         |   assignment  |   inc_dec |   return     
                 |   break           |   continue            |   print       |   block   |   while             
-                |   for             |   if                  |   function
+                |   for             |   if                  |   function    |   import
 expr_stmt       =   expr ";"
 declaration     =   type ident [ "=" expr ] ";"
 assignment      =   ident ( "=" | "+=" | "+-" | "*=" |  "%=" | "/+" ) expr ";"
@@ -20,6 +20,7 @@ while           =   "while" "(" expr ")" ( stmt | ";" )
 for             =   "for" "(" [ declaration | assignment ] ";" expr ";" assignment | inc_dec ")" ( smt | ";" )
 if              =   "if" "(" expr ")" stmt [ "else" stmt ]
 function        =   "fnc" ident fnc_signature block
+import          =   "import" string_lit ";"
 expr            =   or
 or              =   and { "||" and }
 and             =   bitwise_or { "&&" bitwise_or }
