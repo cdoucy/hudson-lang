@@ -77,7 +77,6 @@ namespace ast
         private:
             std::ostream &_output;
             runtime::Object _expressionResult;
-            runtime::State::ptr _globalState;
             runtime::State::ptr _localState;
 
             const runtime::Object &evaluate(const ast::ExpressionNode::ptr &expr);

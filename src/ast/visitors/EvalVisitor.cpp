@@ -202,8 +202,7 @@ void ast::EvalVisitor::clearState() noexcept
 ast::EvalVisitor::EvalVisitor(std::ostream &output)
 : _output(output),
   _expressionResult(),
-  _globalState(runtime::State::create()),
-  _localState(runtime::State::create(this->_globalState))
+  _localState(runtime::State::create())
 {}
 
 void ast::EvalVisitor::visit(ast::WhileNode &node)
@@ -283,8 +282,7 @@ void ast::EvalVisitor::visit(ast::FunctionNode &node)
 {
     runtime::Object object(node);
 
-    // Add function object to global state, so it can be called from anywhere, including functions
-    this->_globalState->set(node.getIdentifier(), object);
+    this->_localState->set(node.getIdentifier(), object);
 }
 
 void ast::EvalVisitor::visit(ast::CallNode &node)
@@ -305,7 +303,7 @@ void ast::EvalVisitor::visit(ast::CallNode &node)
     // Create a new state for the function.
     // function's state takes global state as parent state, so declared functions can be called from the current function
     // but variables of the current state cannot be references from current function.
-    auto state = runtime::State::create(this->_globalState);
+    auto state = runtime::State::create(this->_localState);
 
     for (std::size_t i = 0; i < params.size(); i++) {
         auto evaluatedParam = this->evaluate(params[i]);
