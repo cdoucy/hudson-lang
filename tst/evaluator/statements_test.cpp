@@ -374,7 +374,7 @@ TEST(StatementTest, Functions)
             .expectedOutput = "8\n"
         },
         StatementTest{
-            .description = "3. Declared function scope should not have access to outer variables",
+            .description = "3. Declared function scope should have access to outer variables",
             .program = "{                   "
                        "    int n = 0;      "
                        "    fnc f() {       "
@@ -382,7 +382,7 @@ TEST(StatementTest, Functions)
                        "    }               "
                        "    f();            "
                        "}                   ",
-            .shouldThrow = true
+            .expectedOutput = "0\n"
         },
         StatementTest{
             .description = "4. Calling a function from a function",
@@ -526,6 +526,62 @@ TEST(StatementTest, Functions)
                                          "2\n"
                                          "4\n"
                                          "256\n"
+        },
+        StatementTest{
+            .description = "17. Function defined in function",
+            .program =
+                "{                                    "
+                "   fnc div(int n, int m) int {         "
+                "       fnc print_int() {               "
+                "           print(42);                  "
+                "       }                               "
+                "       print_int();                    "
+                "       return n / m;                   "
+                "   }                                   "
+                "   div(4, 2);                          "
+                "}                                      ",
+            .expectedOutput =  "42\n"
+        },
+        StatementTest{
+            .description = "18. Function in block",
+            .program =
+            "{                                      "
+            "   {                                   "
+            "       fnc foo() {                     "
+            "           print(\"foo\");             "
+            "       }                               "
+            "       foo();                          "
+            "   }                                   "
+            "}                                      ",
+            .expectedOutput =  "foo\n"
+        },
+        StatementTest{
+            .description = "19. Function called outside of scope #1",
+            .program =
+                "{                                    "
+                "   fnc div(int n, int m) int {         "
+                "       fnc print_int() {               "
+                "           print(42);                  "
+                "       }                               "
+                "       return n / m;                   "
+                "   }                                   "
+                "   div(4, 2);                          "
+                "   print_int();                        "
+                "}                                      ",
+            .shouldThrow = true
+        },
+        StatementTest{
+            .description = "20. Function called outside of scope #2",
+            .program =
+            "{                                      "
+            "   {                                   "
+            "       fnc foo() {                     "
+            "           print(\"foo\");             "
+            "       }                               "
+            "   }                                   "
+            "   foo();                              "
+            "}                                      ",
+            .shouldThrow = true
         }
     };
 
