@@ -23,7 +23,7 @@ set(CMAKE_CXX_FLAGS "-std=c++20 -Wpedantic -Wall -Wextra ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g3 ${CMAKE_CXX_FLAGS_DEBUG}")
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "test")
-    add_subdirectory(tst)
+    add_subdirectory(tests)
     return()
 endif()
 

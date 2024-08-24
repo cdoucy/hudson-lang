@@ -9,7 +9,7 @@ set(TARGET interpreter-test)
 set (PROJECT_ROOT ./..)
 include(${PROJECT_ROOT}/src/src.cmake)
 include(${PROJECT_ROOT}/inc/inc.cmake)
-include(${PROJECT_ROOT}/tst/tst.cmake)
+include(${PROJECT_ROOT}/tests/tst.cmake)
 
 include(FetchContent)
 FetchContent_Declare(
